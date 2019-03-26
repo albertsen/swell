@@ -1,34 +1,29 @@
 defmodule TestData do
-  defstruct id: "", status: "", time_updated: nil
+  defstruct id: "", status: "", time_updated: nil, input: nil, output: nil
 end
 
-defmodule TestActions do
-  def validate(doc) do
-    {:ok, %{doc | status: :validated}}
-  end
-
-  def touch(doc) do
-    {:ok, %{doc | time_updated: DateTime.utc_now()}}
-  end
-end
-
-defmodule Swell.ProcessEngineTest do
+defmodule Swell.WorkflowExecutorTest do
   use ExUnit.Case
+  @before DateTime.utc_now()
 
   test "executes workflow correctly" do
-    before = DateTime.utc_now()
-
-    workflow_def = %Swell.WorkflowDef{
+    workflow = %Swell.Workflow{
       id: :test_workflow,
       steps: %{
-        start: %Swell.WorkflowDef.StepDef{
-          action: &TestActions.validate/1,
+        start: %Swell.Workflow.Step{
+          action: fn (doc) -> {:ok, %{doc | status: :validated}} end,
           transitions: %{
             ok: :touch
           }
         },
-        touch: %Swell.WorkflowDef.StepDef{
-          action: &TestActions.touch/1,
+        touch: %Swell.Workflow.Step{
+          action: fn (doc) -> {:ok, %{doc | time_updated: DateTime.utc_now()}} end,
+          transitions: %{
+            ok: :calculate
+          }
+        },
+        calculate: %Swell.Workflow.Step{
+          action: fn (doc) -> {:ok, %{doc | output: doc.input*2}} end,
           transitions: %{
             ok: :end
           }
@@ -37,14 +32,51 @@ defmodule Swell.ProcessEngineTest do
       }
     }
 
-    document = %TestData{
-      id: "123",
-      status: :new
-    }
+    count = 1000000
 
-    document = Swell.WorkflowEngine.execute(workflow_def, document)
-
-    assert document.status == :validated
-    assert before < document.time_updated
+    1..count
+    |> Enum.each(fn (i) ->
+      document = %TestData{
+        id: "123",
+        status: :new,
+        input: i,
+      }
+      Swell.WorkflowEngine.execute(workflow, document)
+    end)
+    check_for_result(:empty, count)
   end
+
+  defp check_for_result(:empty, 0), do: nil
+
+  defp check_for_result(:empty, count) do
+    check_for_result(Swell.Queue.dequeue(:results), count)
+  end
+
+  defp check_for_result({:value, {result_code, doc}}, count) do
+    assert result_code == :done
+    assert doc.status == :validated
+    :lt = DateTime.compare(@before, doc.time_updated)
+    assert doc.output == doc.input * 2
+    check_for_result(:empty, count - 1)
+  end
+
+  # test "handles workflow error" do
+  #   workflow = %Swell.Workflow{
+  #     id: :test_workflow,
+  #     steps: %{
+  #       start: %Swell.Workflow.Step{
+  #         action: fn(_) -> raise "Boom!" end,
+  #         transitions: %{
+  #           ok: :end
+  #         }
+  #       },
+  #       end: :done
+  #     }
+  #   }
+
+  #   Swell.WorkflowEngine.execute(workflow, %{})
+  #   check_for_result(:empty)
+  # end
+
+
 end

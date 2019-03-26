@@ -1,64 +1,35 @@
 defmodule Swell.WorkflowEngine do
-  alias Swell.WorkflowEngine.StepExecutor
+  use GenServer
+  alias Swell.WorkflowEngine.StepWorkerSupervisor
+  @me __MODULE__
 
-  @spec execute(Swell.WorkflowDef.t(), any()) :: any()
-  def execute(workflow_def, document) when is_map(workflow_def) and is_map(document) do
-    execute_all_steps(workflow_def, :start, document)
+  def start_link(worker_count) do
+    GenServer.start_link(@me, worker_count, name: @me)
   end
 
-  defp execute_all_steps(_workflow_def, nil, document) when is_map(document), do: document
-
-  defp execute_all_steps(workflow_def, step_name, document)
-       when is_map(workflow_def) and is_atom(step_name) and is_map(document) do
-    step_def = workflow_def.steps[step_name]
-    {code, document} = StepExecutor.execute_step(step_def, document)
-    next_step_name = next_step_name(step_def, code)
-    execute_all_steps(workflow_def, next_step_name, document)
+  def execute(workflow, document) do
+    GenServer.cast(@me, {:execute, workflow, document})
   end
 
-  @spec next_step_name(Swell.WorkflowDef.StepDef.t() | atom(), atom()) :: atom()
-  def next_step_name(%Swell.WorkflowDef.StepDef{transitions: transitions} = step_def, code)
-      when is_map(transitions) and is_atom(code) do
-    next_step_name = transitions[code]
-
-    if !next_step_name,
-      do: raise("No transition in step #{inspect(step_def)} for result with code #{code}")
-
-    next_step_name
+  @impl GenServer
+  def init(worker_count) do
+    Process.send_after(self(), :start_workers, 0)
+    {:ok, worker_count}
   end
 
-  def next_step_name(final_result, _code)
-      when is_atom(final_result),
-      do: nil
-end
 
-defmodule Swell.WorkflowEngine.StepExecutor do
-  alias Swell.WorkflowEngine.ActionExecutor
-
-  @spec execute_step(Swell.WorkflowDef.StepDef.t() | atom(), any()) :: {atom(), any()}
-  def execute_step(step_def, document)
-      when (is_map(step_def) or is_atom(step_def)) and is_map(document) do
-    do_execute_step(step_def, document)
+  @impl GenServer
+  def handle_cast({:execute, workflow, document}, worker_count) do
+    Swell.Queue.enqueue(
+      :steps,
+      {workflow, :start, document}
+    )
+    {:noreply, worker_count}
   end
 
-  defp do_execute_step(
-         final_result,
-         document
-       )
-       when is_atom(final_result) and is_map(document) do
-    {final_result, document}
-  end
-
-  defp do_execute_step(%Swell.WorkflowDef.StepDef{action: action} = _step_def, document)
-       when is_map(document) do
-    ActionExecutor.execute(action, document)
-  end
-end
-
-defmodule Swell.WorkflowEngine.ActionExecutor do
-  @spec execute((map() -> {atom(), map()}), map()) :: {atom(), map()}
-  def execute(action, document)
-      when is_function(action) and is_map(document) do
-    action.(document)
+  @impl GenServer
+  def handle_info(:start_workers, worker_count) do
+    StepWorkerSupervisor.start_workers(worker_count)
+    {:noreply, worker_count}
   end
 end
