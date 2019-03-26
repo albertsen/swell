@@ -25,6 +25,15 @@ defmodule Swell.WorkflowExecutorTest do
         calculate: %Swell.Workflow.Step{
           action: fn (doc) -> {:ok, %{doc | output: doc.input*2}} end,
           transitions: %{
+            ok: :sleep
+          }
+        },
+        sleep: %Swell.Workflow.Step{
+          action: fn (doc) ->
+            :timer.sleep(50)
+            {:ok, doc}
+          end,
+          transitions: %{
             ok: :end
           }
         },
@@ -32,7 +41,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1000000
+    count = 1000
 
     1..count
     |> Enum.each(fn (i) ->

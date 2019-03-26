@@ -11,7 +11,7 @@ defmodule Swell.Application do
       Supervisor.child_spec({Swell.Queue, :steps}, id: :steps_queue),
       Supervisor.child_spec({Swell.Queue, :results}, id: :results_queue),
       Swell.WorkflowEngine.StepWorkerSupervisor,
-      {Swell.WorkflowEngine, 1}
+      {Swell.WorkflowEngine, 100}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
