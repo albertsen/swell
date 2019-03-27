@@ -73,13 +73,13 @@ defmodule Swell.WorkflowExecutorTest do
     check_for_result(:empty, count - 1)
   end
 
-  test "handles workflow error" do
+  test "handles runtime exception error" do
     workflow = %Workflow{
       id: :test_workflow,
       steps: %{
         start: %Step{
           action: fn(_) ->
-            You.do_you()
+            raise "Boom!"
           end,
           transitions: %{
             ok: :end
@@ -89,8 +89,16 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
     WorkflowExecutor.execute(workflow, %{})
-    :timer.sleep(100)
-    check_for_result(:empty, 0)
+    check_for_error(:empty)
+  end
+
+  defp check_for_error(:empty) do
+    check_for_error(Swell.Queue.dequeue(:errors))
+  end
+
+  defp check_for_error({:value, {_workflow, step_name, _document, error}}) do
+    assert step_name == :start
+    assert error == %RuntimeError{message: "Boom!"}
   end
 
 

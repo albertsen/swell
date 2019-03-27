@@ -10,6 +10,7 @@ defmodule Swell.Application do
     children = [
       Supervisor.child_spec({Swell.Queue, :steps}, id: :steps_queue),
       Supervisor.child_spec({Swell.Queue, :results}, id: :results_queue),
+      Supervisor.child_spec({Swell.Queue, :errors}, id: :errors_queue),
       Swell.Engine.StepWorkerSupervisor,
       {Swell.Engine.WorkflowExecutor, 100}
     ]
