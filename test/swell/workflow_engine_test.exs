@@ -89,16 +89,55 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
     WorkflowExecutor.execute(workflow, %{})
-    check_for_error(:empty)
+    check_for_error(:empty, {:start, %RuntimeError{message: "Boom!"}})
   end
 
-  defp check_for_error(:empty) do
-    check_for_error(Swell.Queue.dequeue(:errors))
+  test "throws error when a result code doesn't have a transition" do
+    workflow = %Workflow{
+      id: :test_workflow,
+      steps: %{
+        start: %Step{
+          action: fn(doc) -> {:notexisting, doc} end,
+          transitions: %{
+            ok: :end
+          }
+        },
+        end: :done
+      }
+    }
+    WorkflowExecutor.execute(workflow, %{})
+    check_for_error(:empty, {:start,  %Swell.Engine.WorkflowError{
+      message: "No transition in step [start] for result with code [notexisting]"
+    }})
   end
 
-  defp check_for_error({:value, {_workflow, step_name, _document, error}}) do
-    assert step_name == :start
-    assert error == %RuntimeError{message: "Boom!"}
+  test "throws error when a transition points to an invalid step" do
+    workflow = %Workflow{
+      id: :test_workflow,
+      steps: %{
+        start: %Step{
+          action: fn(doc) -> {:ok, doc} end,
+          transitions: %{
+            ok: :notexisting
+          }
+        },
+        end: :done
+      }
+    }
+    WorkflowExecutor.execute(workflow, %{})
+    check_for_error(:empty, {:notexisting,  %Swell.Engine.WorkflowError{
+      message: "Invalid step: [notexisting]"
+    }})
+  end
+
+
+  defp check_for_error(:empty, {expected_step_name, expected_error}) do
+    check_for_error(Swell.Queue.dequeue(:errors), {expected_step_name, expected_error})
+  end
+
+  defp check_for_error({:value, {_workflow, step_name, _document, error}}, {expected_step_name, expected_error}) do
+    assert step_name == expected_step_name
+    assert error == expected_error
   end
 
 
