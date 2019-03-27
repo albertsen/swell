@@ -1,7 +1,8 @@
-defmodule Swell.WorkflowEngine.StepWorkerSupervisor do
+defmodule Swell.Engine.StepWorkerSupervisor do
 
   use DynamicSupervisor
-  alias Swell.WorkflowEngine.StepWorker
+  alias Swell.Engine.StepWorker
+  require Logger
   @me __MODULE__
 
   def start_link(worker_count) do
@@ -11,6 +12,7 @@ defmodule Swell.WorkflowEngine.StepWorkerSupervisor do
   def init(_) do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
+
 
   def start_workers(count \\ 1) do
     for _ <- 1..count do

@@ -4,31 +4,35 @@ end
 
 defmodule Swell.WorkflowExecutorTest do
   use ExUnit.Case
+  alias Swell.Definition.Workflow
+  alias Swell.Definition.Step
+  alias Swell.Engine.WorkflowExecutor
+
   @before DateTime.utc_now()
 
   test "executes workflow correctly" do
-    workflow = %Swell.Workflow{
+    workflow = %Workflow{
       id: :test_workflow,
       steps: %{
-        start: %Swell.Workflow.Step{
+        start: %Step{
           action: fn (doc) -> {:ok, %{doc | status: :validated}} end,
           transitions: %{
             ok: :touch
           }
         },
-        touch: %Swell.Workflow.Step{
+        touch: %Step{
           action: fn (doc) -> {:ok, %{doc | time_updated: DateTime.utc_now()}} end,
           transitions: %{
             ok: :calculate
           }
         },
-        calculate: %Swell.Workflow.Step{
+        calculate: %Step{
           action: fn (doc) -> {:ok, %{doc | output: doc.input*2}} end,
           transitions: %{
             ok: :sleep
           }
         },
-        sleep: %Swell.Workflow.Step{
+        sleep: %Step{
           action: fn (doc) ->
             :timer.sleep(50)
             {:ok, doc}
@@ -50,7 +54,7 @@ defmodule Swell.WorkflowExecutorTest do
         status: :new,
         input: i,
       }
-      Swell.WorkflowEngine.execute(workflow, document)
+      WorkflowExecutor.execute(workflow, document)
     end)
     check_for_result(:empty, count)
   end
@@ -69,23 +73,25 @@ defmodule Swell.WorkflowExecutorTest do
     check_for_result(:empty, count - 1)
   end
 
-  # test "handles workflow error" do
-  #   workflow = %Swell.Workflow{
-  #     id: :test_workflow,
-  #     steps: %{
-  #       start: %Swell.Workflow.Step{
-  #         action: fn(_) -> raise "Boom!" end,
-  #         transitions: %{
-  #           ok: :end
-  #         }
-  #       },
-  #       end: :done
-  #     }
-  #   }
-
-  #   Swell.WorkflowEngine.execute(workflow, %{})
-  #   check_for_result(:empty)
-  # end
+  test "handles workflow error" do
+    workflow = %Workflow{
+      id: :test_workflow,
+      steps: %{
+        start: %Step{
+          action: fn(_) ->
+            You.do_you()
+          end,
+          transitions: %{
+            ok: :end
+          }
+        },
+        end: :done
+      }
+    }
+    WorkflowExecutor.execute(workflow, %{})
+    :timer.sleep(100)
+    check_for_result(:empty, 0)
+  end
 
 
 end

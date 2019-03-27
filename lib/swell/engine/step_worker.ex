@@ -1,7 +1,7 @@
-defmodule Swell.WorkflowEngine.StepWorker do
+defmodule Swell.Engine.StepWorker do
 
   use GenServer
-  alias Swell.WorkflowEngine.StepExecutor
+  alias Swell.Engine.StepExecutor
 
   @me __MODULE__
   @steps :steps
@@ -13,7 +13,7 @@ defmodule Swell.WorkflowEngine.StepWorker do
 
   @impl GenServer
   def init(_) do
-    Process.send_after(self(), :execute_step, 0)
+    send(self(), :execute_step)
     {:ok, nil}
   end
 

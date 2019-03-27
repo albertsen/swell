@@ -1,6 +1,6 @@
-defmodule Swell.WorkflowEngine.StepExecutor do
-  alias Swell.WorkflowEngine.ActionExecutor
-  require Logger
+defmodule Swell.Engine.StepExecutor do
+  alias Swell.Engine.ActionExecutor
+  alias Swell.Definition.Step
 
   def execute_step(workflow, step_name, document) do
     step = workflow.steps[step_name]
@@ -13,11 +13,11 @@ defmodule Swell.WorkflowEngine.StepExecutor do
     {final_result, document}
   end
 
-  defp execute_step(%Swell.Workflow.Step{action: action} = step, document) when is_map(step) do
+  defp execute_step(%Step{action: action} = step, document) when is_map(step) do
     ActionExecutor.execute(action, document)
   end
 
-  defp next_step_name(%Swell.Workflow.Step{transitions: transitions} = step, result_code)  do
+  defp next_step_name(%Step{transitions: transitions} = step, result_code)  do
     next_step_name = transitions[result_code]
     if !next_step_name,
       do:

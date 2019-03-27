@@ -1,6 +1,7 @@
-defmodule Swell.WorkflowEngine do
+defmodule Swell.Engine.WorkflowExecutor do
   use GenServer
-  alias Swell.WorkflowEngine.StepWorkerSupervisor
+  alias Swell.Engine.StepWorkerSupervisor
+  require Logger
   @me __MODULE__
 
   def start_link(worker_count) do
@@ -13,10 +14,9 @@ defmodule Swell.WorkflowEngine do
 
   @impl GenServer
   def init(worker_count) do
-    Process.send_after(self(), :start_workers, 0)
+    send(self(), :start_workers)
     {:ok, worker_count}
   end
-
 
   @impl GenServer
   def handle_cast({:execute, workflow, document}, worker_count) do
