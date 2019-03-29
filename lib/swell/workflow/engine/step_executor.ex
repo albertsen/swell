@@ -1,7 +1,7 @@
-defmodule Swell.Engine.StepExecutor do
-  alias Swell.Engine.ActionExecutor
-  alias Swell.Engine.WorkflowError
-  alias Swell.Definition.Step
+defmodule Swell.Workflow.Engine.StepExecutor do
+  alias Swell.Workflow.Engine.ActionExecutor
+  alias Swell.Workflow.Engine.WorkflowError
+  alias Swell.Workflow.Definition.Step
 
   def execute_step(workflow, step_name, document) do
     step = workflow.steps[step_name]

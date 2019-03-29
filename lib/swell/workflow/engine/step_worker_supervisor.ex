@@ -1,7 +1,7 @@
-defmodule Swell.Engine.StepWorkerSupervisor do
+defmodule Swell.Workflow.Engine.StepWorkerSupervisor do
 
   use DynamicSupervisor
-  alias Swell.Engine.StepWorker
+  alias Swell.Workflow.Engine.StepWorker
   require Logger
   @me __MODULE__
 

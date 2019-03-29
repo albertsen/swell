@@ -8,11 +8,9 @@ defmodule Swell.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      Supervisor.child_spec({Swell.Queue, :steps}, id: :steps_queue),
-      Supervisor.child_spec({Swell.Queue, :results}, id: :results_queue),
-      Supervisor.child_spec({Swell.Queue, :errors}, id: :errors_queue),
-      Swell.Engine.StepWorkerSupervisor,
-      {Swell.Engine.WorkflowExecutor, 100}
+      Swell.AmqpManager,
+      Swell.Workflow.Engine.StepWorkerSupervisor,
+      {Swell.Workflow.Engine.WorkflowExecutor, 1}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
