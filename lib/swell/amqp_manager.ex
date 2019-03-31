@@ -4,7 +4,7 @@ defmodule Swell.AmqpManager do
   use GenServer
   require Logger
 
-  def start_link(name) do
+  def start_link(_) do
     GenServer.start(@me, nil, name: @me)
   end
 

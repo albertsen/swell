@@ -28,16 +28,16 @@ defmodule Swell.Workflow.Engine.StepWorker do
     {:noreply, channel}
   end
 
-  def handle_info({:basic_consume_ok, %{consumer_tag: consumer_tag}}, chan) do
-    {:noreply, chan}
+  def handle_info({:basic_consume_ok, _}, channel) do
+    {:noreply, channel}
   end
 
-  def handle_info({:basic_cancel, %{consumer_tag: consumer_tag}}, chan) do
-    {:stop, :normal, chan}
+  def handle_info({:basic_cancel, _}, channel) do
+    {:stop, :normal, channel}
   end
 
-  def handle_info({:basic_cancel_ok, %{consumer_tag: consumer_tag}}, chan) do
-    {:noreply, chan}
+  def handle_info({:basic_cancel_ok, _}, channel) do
+    {:noreply, channel}
   end
 
   defp execute_step({workflow, step_name, document}) do
