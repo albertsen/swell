@@ -16,7 +16,7 @@ defmodule Swell.Workflow.Engine.StepWorker do
 
   @impl GenServer
   def init(_) do
-    channel = AmqpManager.open_channel([@steps, @results, @errors])
+    channel = AmqpManager.open_channel()
     AmqpManager.consume(channel, @steps)
     {:ok, channel}
   end

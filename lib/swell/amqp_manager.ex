@@ -1,6 +1,7 @@
 defmodule Swell.AmqpManager do
 
   @me __MODULE__
+  @queues ~w{steps results errors}
   use GenServer
   require Logger
 
@@ -8,8 +9,8 @@ defmodule Swell.AmqpManager do
     GenServer.start(@me, nil, name: @me)
   end
 
-  def open_channel(queues) do
-    GenServer.call(@me, {:open_channel, queues})
+  def open_channel() do
+    GenServer.call(@me, :open_channel)
   end
 
   def consume(channel, queue) do
@@ -25,15 +26,16 @@ defmodule Swell.AmqpManager do
   @impl GenServer
   def init(_) do
     {:ok, connection} = AMQP.Connection.open()
-    {:ok, connection}
+    {:ok, channel} = AMQP.Channel.open(connection)
+    @queues |> Enum.each(&(AMQP.Queue.declare(channel, &1, durable: true)))
+    {:ok, {connection, channel}}
   end
 
   @impl GenServer
-  def handle_call({:open_channel, queues}, _from, connection) do
+  def handle_call(:open_channel, _from, {connection, channel}) do
     {:ok, channel} = AMQP.Channel.open(connection)
     AMQP.Basic.qos(channel, prefetch_count: 1)
-    queues |> Enum.each(&(AMQP.Queue.declare(channel, &1, durable: true)))
-    {:reply, channel, connection}
+    {:reply, channel, {connection, channel}}
   end
 
 end
