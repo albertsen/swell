@@ -1,4 +1,4 @@
-defmodule Swell.AmqpManager do
+defmodule Swell.Queue.Manager do
 
   @me __MODULE__
   @queues ~w{steps results errors}
@@ -28,14 +28,14 @@ defmodule Swell.AmqpManager do
     {:ok, connection} = AMQP.Connection.open()
     {:ok, channel} = AMQP.Channel.open(connection)
     @queues |> Enum.each(&(AMQP.Queue.declare(channel, &1, durable: true)))
-    {:ok, {connection, channel}}
+    {:ok, connection}
   end
 
   @impl GenServer
-  def handle_call(:open_channel, _from, {connection, channel}) do
+  def handle_call(:open_channel, _from, connection) do
     {:ok, channel} = AMQP.Channel.open(connection)
     AMQP.Basic.qos(channel, prefetch_count: 1)
-    {:reply, channel, {connection, channel}}
+    {:reply, channel, connection}
   end
 
 end

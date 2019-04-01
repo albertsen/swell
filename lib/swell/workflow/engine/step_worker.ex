@@ -2,7 +2,7 @@ defmodule Swell.Workflow.Engine.StepWorker do
 
   use GenServer
   alias Swell.Workflow.Engine.StepExecutor
-  alias Swell.AmqpManager
+  alias Swell.Queue
   require Logger
 
   @me __MODULE__
@@ -16,8 +16,8 @@ defmodule Swell.Workflow.Engine.StepWorker do
 
   @impl GenServer
   def init(_) do
-    channel = AmqpManager.open_channel()
-    AmqpManager.consume(channel, @steps)
+    channel = Queue.Manager.open_channel()
+    Queue.Manager.consume(channel, @steps)
     {:ok, channel}
   end
 
