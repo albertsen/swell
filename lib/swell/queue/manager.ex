@@ -18,7 +18,12 @@ defmodule Swell.Queue.Manager do
   end
 
   def publish(channel, queue, payload) do
-    AMQP.Basic.publish(channel, "", queue, payload, persistent: true)
+    AMQP.Basic.publish(
+      channel,
+      "",
+      queue,
+      :erlang.term_to_binary(payload),
+      persistent: true)
   end
 
   # Server (callbacks)
