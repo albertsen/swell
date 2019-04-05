@@ -2,6 +2,27 @@ defmodule TestData do
   defstruct id: "", status: "", time_updated: nil, input: nil, output: nil
 end
 
+defmodule Swell.WorkflowExecutorTest.Functions do
+
+  def validate(doc) do
+    {:ok, %{doc | status: :validated}}
+  end
+
+  def touch(doc) do
+    {:ok, %{doc | time_updated: DateTime.utc_now()}}
+  end
+
+  def calculate(doc) do
+    {:ok, %{doc | output: doc.input*2}}
+  end
+
+  def sleep(doc) do
+    :timer.sleep(50)
+    {:ok, doc}
+  end
+
+end
+
 defmodule Swell.WorkflowExecutorTest do
   use ExUnit.Case
   alias Swell.Workflow.Definition.Workflow
@@ -15,28 +36,25 @@ defmodule Swell.WorkflowExecutorTest do
       id: :test_workflow,
       steps: %{
         start: %Step{
-          action: fn (doc) -> {:ok, %{doc | status: :validated}} end,
+          action: {Swell.WorkflowExecutorTest.Functions, :validate},
           transitions: %{
             ok: :touch
           }
         },
         touch: %Step{
-          action: fn (doc) -> {:ok, %{doc | time_updated: DateTime.utc_now()}} end,
+          action: {Swell.WorkflowExecutorTest.Functions, :touch},
           transitions: %{
             ok: :calculate
           }
         },
         calculate: %Step{
-          action: fn (doc) -> {:ok, %{doc | output: doc.input*2}} end,
+          action: {Swell.WorkflowExecutorTest.Functions, :calculate},
           transitions: %{
             ok: :sleep
           }
         },
         sleep: %Step{
-          action: fn (doc) ->
-            :timer.sleep(50)
-            {:ok, doc}
-          end,
+          action: {Swell.WorkflowExecutorTest.Functions, :sleep},
           transitions: %{
             ok: :end
           }
@@ -45,7 +63,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1
+    count = 1000
 
     1..count
     |> Enum.each(fn (i) ->
@@ -56,23 +74,21 @@ defmodule Swell.WorkflowExecutorTest do
       }
       WorkflowExecutor.execute(workflow, document)
     end)
-    :timer.sleep(1000)
-    # check_for_result(:empty, count)
+    chan = Swell.Queue.Manager.open_channel()
+    Swell.Queue.Manager.consume(chan, "results")
+    Swell.Queue.Receiver.wait_for_messages(chan, &check_result/2, count)
   end
 
-  # defp check_for_result(:empty, 0), do: nil
-
-  # defp check_for_result(:empty, count) do
-  #   check_for_result(Swell.Queue.dequeue(:results), count)
-  # end
-
-  # defp check_for_result({:value, {result_code, doc}}, count) do
-  #   assert result_code == :done
-  #   assert doc.status == :validated
-  #   :lt = DateTime.compare(@before, doc.time_updated)
-  #   assert doc.output == doc.input * 2
-  #   check_for_result(:empty, count - 1)
-  # end
+  def check_result({result_code, doc}, count) do
+    assert result_code == :done
+    assert doc.status == :validated
+    assert :lt == DateTime.compare(@before, doc.time_updated)
+    assert doc.output == doc.input * 2
+    case count do
+      1 -> {:done, 0}
+      _ -> {:next, count - 1}
+    end
+  end
 
   # test "handles runtime exception error" do
   #   workflow = %Workflow{

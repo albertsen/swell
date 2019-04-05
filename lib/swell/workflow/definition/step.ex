@@ -3,7 +3,7 @@ defmodule Swell.Workflow.Definition.Step do
   defstruct action: nil, transitions: nil
 
   @type t :: %Swell.Workflow.Definition.Step{
-          action: (map() -> {atom(), map()}),
+          action: {atom(), atom()},
           transitions: %{atom() => atom()}
         }
 end

@@ -14,16 +14,20 @@ defmodule Swell.Queue.Manager do
   end
 
   def consume(channel, queue) do
-    AMQP.Basic.consume(channel, queue)
+    {:ok, _} = AMQP.Basic.consume(channel, queue)
   end
 
   def publish(channel, queue, payload) do
-    AMQP.Basic.publish(
+    :ok = AMQP.Basic.publish(
       channel,
       "",
       queue,
       :erlang.term_to_binary(payload),
       persistent: true)
+  end
+
+  def ack(channel, delivery_tag) do
+    AMQP.Basic.ack(channel, delivery_tag)
   end
 
   # Server (callbacks)

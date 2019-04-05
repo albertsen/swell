@@ -10,7 +10,7 @@ defmodule Swell.Application do
     children = [
       Swell.Queue.Manager,
       Swell.Workflow.Engine.StepWorkerSupervisor,
-      {Swell.Workflow.Engine.WorkflowExecutor, 1}
+      {Swell.Workflow.Engine.WorkflowExecutor, 1000}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
