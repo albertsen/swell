@@ -1,7 +1,7 @@
 defmodule Swell.Queue.Manager do
 
   @me __MODULE__
-  @queues ~w{steps results errors}
+  @queues ~w{steps transitions errors done}
   use GenServer
   require Logger
 

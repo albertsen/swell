@@ -9,7 +9,7 @@ defmodule Swell.Application do
     # List all child processes to be supervised
     children = [
       Swell.Queue.Manager,
-      Swell.Workflow.Engine.StepWorkerSupervisor,
+      Swell.Workflow.Engine.Workers.WorkerSupervisor,
       {Swell.Workflow.Engine.WorkflowExecutor, 1000}
     ]
 

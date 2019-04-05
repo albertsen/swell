@@ -1,6 +1,6 @@
 defmodule Swell.Workflow.Engine.WorkflowExecutor do
   use GenServer
-  alias Swell.Workflow.Engine.StepWorkerSupervisor
+  alias Swell.Workflow.Engine.Workers.WorkerSupervisor
   require Logger
   @steps "steps"
   @me __MODULE__
@@ -9,29 +9,28 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
     GenServer.start_link(@me, worker_count, name: @me)
   end
 
-  def execute(workflow, document) do
-    GenServer.cast(@me, {:execute, workflow, document})
+  def execute(workflow_def, document) do
+    GenServer.call(@me, {:execute, workflow_def, document})
   end
 
   @impl GenServer
   def init(worker_count) do
-    {:ok, connection} = AMQP.Connection.open()
-    {:ok, channel} = AMQP.Channel.open(connection)
-    AMQP.Queue.declare(channel, @steps, durable: true)
     send(self(), :start_workers)
+    channel = Swell.Queue.Manager.open_channel()
     {:ok, {worker_count, channel}}
   end
 
   @impl GenServer
-  def handle_cast({:execute, workflow, document}, {worker_count, channel}) do
-    payload = :erlang.term_to_binary({workflow, :start, document})
-    AMQP.Basic.publish(channel, "", @steps, payload, persistent: true)
-    {:noreply, {worker_count, channel}}
+  def handle_call({:execute, workflow_def, document}, _from, {worker_count, channel}) do
+    id = UUID.uuid4()
+    message = {:step, {id, workflow_def, :start, document}}
+    Swell.Queue.Manager.publish(channel, @steps, message)
+    {:reply, id, {worker_count, channel}}
   end
 
   @impl GenServer
   def handle_info(:start_workers, {worker_count, channel}) do
-    StepWorkerSupervisor.start_workers(worker_count)
+    WorkerSupervisor.start_workers(worker_count)
     {:noreply, {worker_count, channel}}
   end
 end
