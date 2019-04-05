@@ -22,7 +22,7 @@ defmodule Swell.Workflow.Engine.StepWorker do
   end
 
   def consume_message({workflow, step_name, document} = message, channel) do
-    Logger.debug("Consuming message: #{inspect(message)} - #{inspect(self())}")
+    Logger.debug(fn -> "Consuming message: #{inspect(message)} - #{inspect(self())}" end)
     try do
       StepExecutor.execute_step(workflow, step_name, document)
     rescue
@@ -34,17 +34,17 @@ defmodule Swell.Workflow.Engine.StepWorker do
   end
 
   defp enqueue_next({result_code, document, nil} = message, _workflow, channel) do
-    Logger.debug("RESULT: #{inspect(message)}")
+    Logger.debug(fn -> "RESULT: #{inspect(message)}" end)
     Swell.Queue.Manager.publish(channel, @results, {result_code, document})
   end
 
   defp enqueue_next({_result_code, document, next_step_name} = message, workflow, channel) do
-    Logger.debug("NEXT STEP: #{inspect(message)}")
+    Logger.debug(fn -> "NEXT STEP: #{inspect(message)}" end)
     Swell.Queue.Manager.publish(channel, @steps, {workflow, next_step_name, document})
   end
 
   defp enqueue_next({:error, document, step_name, error} = message, workflow, channel) do
-    Logger.debug("ERROR: #{inspect(message)}")
+    Logger.debug(fn -> "ERROR: #{inspect(message)}" end)
     Swell.Queue.Manager.publish(channel, @errors, {workflow, step_name, document, error})
   end
 
