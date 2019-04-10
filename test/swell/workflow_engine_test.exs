@@ -39,6 +39,7 @@ defmodule Swell.WorkflowExecutorTest do
   alias Swell.Workflow.Definition.WorkflowDef
   alias Swell.Workflow.Definition.StepDef
   alias Swell.Workflow.Engine.WorkflowExecutor
+  require Logger
 
   @before DateTime.utc_now()
 
@@ -74,7 +75,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1000
+    count = 1
 
     1..count
     |> Enum.each(fn i ->
@@ -87,12 +88,21 @@ defmodule Swell.WorkflowExecutorTest do
       WorkflowExecutor.execute(workflow, document)
     end)
 
-    chan = Swell.Queue.Manager.open_channel()
-    Swell.Queue.Manager.consume(chan, "done")
-    Swell.Queue.Receiver.wait_for_messages(chan, &check_result/2, count)
+    await_result(~w{done}, "done", &check_success/2, count)
   end
 
-  def check_result({:done, {_id, _workflow, document}}, count) do
+  defp await_result(routing_keys, queue, func, count \\ 1) do
+    channel = Swell.Queue.Manager.open_channel()
+    {:ok, consumer_tag} = Swell.Queue.Manager.consume(channel, routing_keys, queue)
+    try do
+      Swell.Queue.Receiver.wait_for_messages(channel, func, count)
+    after
+      Swell.Queue.Manager.cancel(channel, consumer_tag)
+    end
+  end
+
+  def check_success({:done, {_id, _workflow_def, document}}, count) do
+    Logger.debug("Count: #{count}")
     assert document.status == :validated
     assert :lt == DateTime.compare(@before, document.time_updated)
     assert document.output == document.input * 2
@@ -102,72 +112,87 @@ defmodule Swell.WorkflowExecutorTest do
     end
   end
 
-  # test "handles runtime exception error" do
-  #   workflow = %Workflow{
-  #     id: :test_workflow,
-  #     steps: %{
-  #       start: %Step{
-  #         action: {Swell.WorkflowExecutorTest.Functions, :boom},
-  #         transitions: %{
-  #           ok: :end
-  #         }
-  #       },
-  #       end: :done
-  #     }
-  #   }
+  test "handles runtime exception error" do
+    workflow = %WorkflowDef{
+      id: :test_workflow,
+      steps: %{
+        start: %StepDef{
+          action: {Swell.WorkflowExecutorTest.Functions, :boom},
+          transitions: %{
+            ok: :end
+          }
+        },
+        end: :done
+      }
+    }
 
-  #   WorkflowExecutor.execute(workflow, %{})
-  #   wait_for_error({:start, %RuntimeError{message: "Boom!"}})
-  # end
-
-  # test "throws error when a result code doesn't have a transition" do
-  #   workflow = %Workflow{
-  #     id: :test_workflow,
-  #     steps: %{
-  #       start: %Step{
-  #         action: {Swell.WorkflowExecutorTest.Functions, :nonexisting_transition},
-  #         transitions: %{
-  #           ok: :end
-  #         }
-  #       },
-  #       end: :done
-  #     }
-  #   }
-  #   WorkflowExecutor.execute(workflow, %{})
-  #   wait_for_error({:start,  %Swell.Workflow.Engine.WorkflowError{
-  #     message: "No transition in step [start] for result with code [nonexisting]"
-  #   }})
-  # end
-
-  # test "throws error when a transition points to an invalid step" do
-  #   workflow = %Workflow{
-  #     id: :test_workflow,
-  #     steps: %{
-  #       start: %Step{
-  #         action: {Swell.WorkflowExecutorTest.Functions, :ok},
-  #         transitions: %{
-  #           ok: :nonexisting
-  #         }
-  #       },
-  #       end: :done
-  #     }
-  #   }
-  #   WorkflowExecutor.execute(workflow, %{})
-  #   wait_for_error({:nonexisting,  %Swell.Workflow.Engine.WorkflowError{
-  #     message: "Invalid step: [nonexisting]"
-  #   }})
-  # end
-
-  def wait_for_error(expected) do
-    chan = Swell.Queue.Manager.open_channel()
-    Swell.Queue.Manager.consume(chan, "errors")
-    Swell.Queue.Receiver.wait_for_messages(chan, &check_error/2, expected)
+    WorkflowExecutor.execute(workflow, %{})
+    await_result(
+      ~w{error},
+      "errors",
+      check_error(:start, %RuntimeError{message: "Boom!"})
+    )
   end
 
-  def check_error({_workflow, step_name, _document, error}, {expected_step_name, expected_error}) do
-    assert step_name == expected_step_name
-    assert error == expected_error
-    {:done, nil}
+
+  test "throws error when a result code doesn't have a transition" do
+    workflow = %WorkflowDef{
+      id: :test_workflow,
+      steps: %{
+        start: %StepDef{
+          action: {Swell.WorkflowExecutorTest.Functions, :nonexisting_transition},
+          transitions: %{
+            ok: :end
+          }
+        },
+        end: :done
+      }
+    }
+    WorkflowExecutor.execute(workflow, %{})
+    await_result(
+      ~w{error},
+      "errors",
+      check_error(
+        :start,
+        %Swell.Workflow.Engine.WorkflowError{
+          message: "No transition in step [start] for result with code [nonexisting]"
+        }
+      )
+    )
+  end
+
+  test "throws error when a transition points to an invalid step" do
+    workflow = %WorkflowDef{
+      id: :test_workflow,
+      steps: %{
+        start: %StepDef{
+          action: {Swell.WorkflowExecutorTest.Functions, :ok},
+          transitions: %{
+            ok: :nonexisting
+          }
+        },
+        end: :done
+      }
+    }
+    WorkflowExecutor.execute(workflow, %{})
+    await_result(
+      ~w{error},
+      "errors",
+      check_error(
+        :nonexisting,
+        %Swell.Workflow.Engine.WorkflowError{
+          message: "Invalid step: [nonexisting]"
+        }
+      )
+    )
+  end
+
+  defp check_error(expected_step_name, expected_error) do
+    fn ({:error, {_id, _workflow_def, _document, step_name, error}}, _count) ->
+      assert step_name == expected_step_name
+      assert error == expected_error
+      {:done, 0}
+    end
   end
 
 

@@ -1,10 +1,10 @@
 defmodule Swell.Queue.Consumer do
 
-  @callback consume_message(any(), AMQP.Channel.t()) :: :ok
+  @callback consume(any(), AMQP.Channel.t()) :: :ok
 
-  def init_consumer(queue) do
+  def init_consumer(routing_keys, queue) do
     channel = Swell.Queue.Manager.open_channel()
-    Swell.Queue.Manager.consume(channel, queue)
+    Swell.Queue.Manager.consume(channel, routing_keys, queue)
     {:ok, channel}
   end
 
@@ -17,7 +17,7 @@ defmodule Swell.Queue.Consumer do
         :ok =
           :erlang.binary_to_term(payload)
           |> log_message()
-          |> consume_message(channel)
+          |> consume(channel)
         Swell.Queue.Manager.ack(channel, meta.delivery_tag)
         {:noreply, channel}
       end

@@ -12,11 +12,11 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
   end
 
   @impl GenServer
-  def init(queue) do
-    init_consumer(queue)
+  def init({binding_keys, queue}) do
+    init_consumer(binding_keys, queue)
   end
 
-  def consume_message({:transition, {id, workflow_def, document, step_name, result}}, channel) do
+  def consume({:transition, {id, workflow_def, document, step_name, result}}, channel) do
     try do
       step_def = workflow_def.steps[step_name]
       if !step_def, do: raise(WorkflowError, message: "Invalid step: [#{step_name}]")
@@ -27,7 +27,7 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
         Logger.error(inspect(error))
         {:error, {id, workflow_def, document, step_name, error}}
     end
-    |> publish_message(channel)
+    |> publish(channel)
   end
 
   defp next_step_name(current_step_name, %StepDef{transitions: transitions}, result)  do

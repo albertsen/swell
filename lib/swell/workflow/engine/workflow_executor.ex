@@ -1,8 +1,8 @@
 defmodule Swell.Workflow.Engine.WorkflowExecutor do
   use GenServer
+  use Swell.Queue.Publisher
   alias Swell.Workflow.Engine.Workers.WorkerSupervisor
   require Logger
-  @steps "steps"
   @me __MODULE__
 
   def start_link(worker_count) do
@@ -24,7 +24,7 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
   def handle_call({:execute, workflow_def, document}, _from, {worker_count, channel}) do
     id = UUID.uuid4()
     message = {:step, {id, workflow_def, :start, document}}
-    Swell.Queue.Manager.publish(channel, @steps, message)
+    publish(message, channel)
     {:reply, id, {worker_count, channel}}
   end
 

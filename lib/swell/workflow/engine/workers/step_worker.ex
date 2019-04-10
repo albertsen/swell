@@ -7,17 +7,16 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
   alias Swell.Workflow.Engine.WorkflowError
   alias Swell.Workflow.Engine.ActionExecutor
 
-
   def start_link(queue) do
     GenServer.start_link(__MODULE__, queue)
   end
 
   @impl GenServer
-  def init(queue) do
-    init_consumer(queue)
+  def init({binding_keys, queue}) do
+    init_consumer(binding_keys, queue)
   end
 
-  def consume_message({:step, {id, workflow_def, step_name, document} = step}, channel) do
+  def consume({:step, {id, workflow_def, step_name, document} = step}, channel) do
     try do
       execute_step(step)
     rescue
@@ -25,7 +24,7 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
         Logger.error(inspect(error))
         {:error, {id, workflow_def, document, step_name, error}}
     end
-    |> publish_message(channel)
+    |> publish(channel)
   end
 
   defp execute_step({id, workflow_def, step_name, document}) do
