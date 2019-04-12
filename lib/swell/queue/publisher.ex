@@ -1,5 +1,4 @@
 defmodule Swell.Queue.Publisher do
-
   require Logger
 
   def publish({routing_key, _payload} = message, channel) do
@@ -12,5 +11,4 @@ defmodule Swell.Queue.Publisher do
       import Swell.Queue.Publisher
     end
   end
-
 end

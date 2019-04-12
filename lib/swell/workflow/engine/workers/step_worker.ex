@@ -30,14 +30,19 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
     |> publish(channel)
   end
 
-  defp execute_step(%Step{step_name: step_name, workflow: %Workflow{definition: workflow_def}} = step) do
+  defp execute_step(
+         %Step{step_name: step_name, workflow: %Workflow{definition: workflow_def}} = step
+       ) do
     step_def = workflow_def.steps[step_name]
     if !step_def, do: raise(WorkflowError, message: "Invalid step: [#{step_name}]")
     do_execute_step(step, step_def)
   end
 
-  defp do_execute_step(%Step{document: document, workflow: workflow} = step, %StepDef{action: action}) do
+  defp do_execute_step(%Step{document: document, workflow: workflow} = step, %StepDef{
+         action: action
+       }) do
     {result, document} = ActionExecutor.execute(action, document)
+
     {
       :transition,
       %Transition{
@@ -49,7 +54,8 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
     }
   end
 
-  defp do_execute_step(%Step{document: document, workflow: workflow}, final_result) when is_atom(final_result) do
+  defp do_execute_step(%Step{document: document, workflow: workflow}, final_result)
+       when is_atom(final_result) do
     {
       :done,
       %Done{
@@ -60,4 +66,3 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
     }
   end
 end
-

@@ -3,7 +3,7 @@ defmodule Swell.DocumentStoreTest do
   alias Swell.DocumentStore
 
   setup_all do
-    start_supervised! {DocumentStore, %{}}
+    start_supervised!({DocumentStore, %{}})
     :ok
   end
 
@@ -20,5 +20,4 @@ defmodule Swell.DocumentStoreTest do
     assert DocumentStore.get("order", "123") == nil
     assert DocumentStore.get("order", "456") == nil
   end
-
 end

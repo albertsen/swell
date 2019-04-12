@@ -22,8 +22,8 @@ defmodule Swell.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      { :amqp, "~> 1.1" },
-      { :uuid, "~> 1.1" },
+      {:amqp, "~> 1.1"},
+      {:uuid, "~> 1.1"},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false}
     ]
   end

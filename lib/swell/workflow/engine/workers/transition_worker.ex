@@ -37,6 +37,7 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
     step_def = workflow_def.steps[step_name]
     if !step_def, do: raise(WorkflowError, message: "Invalid step: [#{step_name}]")
     next_step_name = next_step_name(step_name, step_def, result)
+
     {
       :step,
       %Step{
@@ -49,11 +50,13 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
 
   defp next_step_name(current_step_name, %StepDef{transitions: transitions}, result) do
     next_step_name = transitions[result]
+
     if !next_step_name,
       do:
         raise(WorkflowError,
           message: "No transition in step [#{current_step_name}] for result with code [#{result}]"
         )
+
     next_step_name
   end
 end

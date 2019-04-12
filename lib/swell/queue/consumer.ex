@@ -1,5 +1,4 @@
 defmodule Swell.Queue.Consumer do
-
   @callback consume(map(), AMQP.Channel.t()) :: :ok
 
   def init_consumer(routing_keys, queue) do
@@ -18,6 +17,7 @@ defmodule Swell.Queue.Consumer do
           :erlang.binary_to_term(payload)
           |> log_message()
           |> consume(channel)
+
         Swell.Queue.Manager.ack(channel, meta.delivery_tag)
         {:noreply, channel}
       end

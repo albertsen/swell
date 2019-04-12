@@ -1,5 +1,5 @@
 defmodule TestData do
-  defstruct id: "", status: "", time_updated: nil, input: nil, output: nil
+  defstruct id: nil, status: nil, time_updated: nil, input: nil, output: nil
 end
 
 defmodule Swell.WorkflowExecutorTest.Functions do
@@ -31,7 +31,6 @@ defmodule Swell.WorkflowExecutorTest.Functions do
   def ok(doc) do
     {:ok, doc}
   end
-
 end
 
 defmodule Swell.WorkflowExecutorTest do
@@ -96,6 +95,7 @@ defmodule Swell.WorkflowExecutorTest do
   defp await_result(routing_keys, queue, func, count \\ 1) do
     channel = Swell.Queue.Manager.open_channel()
     {:ok, consumer_tag} = Swell.Queue.Manager.consume(channel, routing_keys, queue)
+
     try do
       Swell.Queue.Receiver.wait_for_messages(channel, func, count)
     after
@@ -109,6 +109,7 @@ defmodule Swell.WorkflowExecutorTest do
     assert :lt == DateTime.compare(@before, document.time_updated)
     assert document.output == document.input * 2
     assert result == :done
+
     case count do
       1 -> {:done, 0}
       _ -> {:next, count - 1}
@@ -130,13 +131,13 @@ defmodule Swell.WorkflowExecutorTest do
     }
 
     WorkflowExecutor.execute(workflow, %{})
+
     await_result(
       ~w{error},
       "errors",
       check_error(:start, %RuntimeError{message: "Boom!"})
     )
   end
-
 
   test "throws error when a result code doesn't have a transition" do
     workflow = %WorkflowDef{
@@ -151,7 +152,9 @@ defmodule Swell.WorkflowExecutorTest do
         end: :done
       }
     }
+
     WorkflowExecutor.execute(workflow, %{})
+
     await_result(
       ~w{error},
       "errors",
@@ -177,7 +180,9 @@ defmodule Swell.WorkflowExecutorTest do
         end: :done
       }
     }
+
     WorkflowExecutor.execute(workflow, %{})
+
     await_result(
       ~w{error},
       "errors",
@@ -191,12 +196,10 @@ defmodule Swell.WorkflowExecutorTest do
   end
 
   defp check_error(expected_step_name, expected_error) do
-    fn ({:error, %Error{message: {_, %{step_name: step_name}}, error: error}}, _count) ->
+    fn {:error, %Error{message: {_, %{step_name: step_name}}, error: error}}, _count ->
       assert step_name == expected_step_name
       assert error == expected_error
       {:done, 0}
     end
   end
-
-
 end

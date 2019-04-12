@@ -1,5 +1,5 @@
 defmodule Swell.Workflow.State.Workflow do
-  @enforce_keys [:id, :definition, :document, :step, :result, ]
+  @enforce_keys [:id, :definition, :document, :step, :result]
   defstruct id: nil, definition: nil, document: nil, step: nil, result: nil, status: nil
 
   @type t :: %Swell.Workflow.State.Workflow{

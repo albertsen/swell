@@ -1,5 +1,4 @@
 defmodule Swell.Queue.Manager do
-
   @me __MODULE__
   @exchange "workflow"
   use GenServer
@@ -12,12 +11,15 @@ defmodule Swell.Queue.Manager do
   def open_channel() do
     GenServer.call(@me, :open_channel)
   end
+
   def consume(channel, routing_keys, queue)
-    when is_list(routing_keys) and is_binary(queue) do
-      {:ok, _} = AMQP.Queue.declare(channel, queue, durable: true)
-      for key <- routing_keys do
-        AMQP.Queue.bind(channel, queue, @exchange, routing_key: key)
-      end
+      when is_list(routing_keys) and is_binary(queue) do
+    {:ok, _} = AMQP.Queue.declare(channel, queue, durable: true)
+
+    for key <- routing_keys do
+      AMQP.Queue.bind(channel, queue, @exchange, routing_key: key)
+    end
+
     {:ok, _} = AMQP.Basic.consume(channel, queue)
   end
 
@@ -28,12 +30,15 @@ defmodule Swell.Queue.Manager do
   def publish(channel, routing_key, payload) do
     msg = :erlang.term_to_binary(payload)
     Logger.debug("Message size: #{byte_size(msg)}")
-    :ok = AMQP.Basic.publish(
-      channel,
-      @exchange,
-      routing_key,
-      msg,
-      persistent: true)
+
+    :ok =
+      AMQP.Basic.publish(
+        channel,
+        @exchange,
+        routing_key,
+        msg,
+        persistent: true
+      )
   end
 
   def ack(channel, delivery_tag) do
@@ -56,5 +61,4 @@ defmodule Swell.Queue.Manager do
     AMQP.Basic.qos(channel, prefetch_count: 1)
     {:reply, channel, connection}
   end
-
 end

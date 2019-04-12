@@ -13,5 +13,4 @@ defmodule Swell.Workflow.Engine.Workers.WorkerHelper do
       import Swell.Workflow.Engine.Workers.WorkerHelper
     end
   end
-
 end

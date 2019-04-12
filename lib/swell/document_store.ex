@@ -36,5 +36,4 @@ defmodule Swell.DocumentStore do
       )
     end
   end
-
 end

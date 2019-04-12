@@ -4,6 +4,6 @@ defmodule Swell.Workflow.Messages.Workflow do
 
   @type t :: %Swell.Workflow.Messages.Workflow{
           id: String.t(),
-          definition: Swell.Workflow.Definition.WorkflowDef.t(),
+          definition: Swell.Workflow.Definition.WorkflowDef.t()
         }
 end
