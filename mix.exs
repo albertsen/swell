@@ -23,7 +23,8 @@ defmodule Swell.MixProject do
   defp deps do
     [
       { :amqp, "~> 1.1" },
-      { :uuid, "~> 1.1" }
+      { :uuid, "~> 1.1" },
+      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false}
     ]
   end
 end

@@ -26,11 +26,13 @@ defmodule Swell.Queue.Manager do
   end
 
   def publish(channel, routing_key, payload) do
+    msg = :erlang.term_to_binary(payload)
+    Logger.debug("Message size: #{byte_size(msg)}")
     :ok = AMQP.Basic.publish(
       channel,
       @exchange,
       routing_key,
-      :erlang.term_to_binary(payload),
+      msg,
       persistent: true)
   end
 

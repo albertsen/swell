@@ -36,6 +36,8 @@ end
 
 defmodule Swell.WorkflowExecutorTest do
   use ExUnit.Case
+  alias Swell.Workflow.Messages.Done
+  alias Swell.Workflow.Messages.Error
   alias Swell.Workflow.Definition.WorkflowDef
   alias Swell.Workflow.Definition.StepDef
   alias Swell.Workflow.Engine.WorkflowExecutor
@@ -75,7 +77,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1
+    count = 1000
 
     1..count
     |> Enum.each(fn i ->
@@ -101,11 +103,12 @@ defmodule Swell.WorkflowExecutorTest do
     end
   end
 
-  def check_success({:done, {_id, _workflow_def, document}}, count) do
+  def check_success({:done, %Done{document: document, result: result}}, count) do
     Logger.debug("Count: #{count}")
     assert document.status == :validated
     assert :lt == DateTime.compare(@before, document.time_updated)
     assert document.output == document.input * 2
+    assert result == :done
     case count do
       1 -> {:done, 0}
       _ -> {:next, count - 1}
@@ -188,7 +191,7 @@ defmodule Swell.WorkflowExecutorTest do
   end
 
   defp check_error(expected_step_name, expected_error) do
-    fn ({:error, {_id, _workflow_def, _document, step_name, error}}, _count) ->
+    fn ({:error, %Error{message: {_, %{step_name: step_name}}, error: error}}, _count) ->
       assert step_name == expected_step_name
       assert error == expected_error
       {:done, 0}

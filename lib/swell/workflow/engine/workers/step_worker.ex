@@ -1,9 +1,13 @@
 defmodule Swell.Workflow.Engine.Workers.StepWorker do
-
   use GenServer
   use Swell.Queue.Consumer
   use Swell.Queue.Publisher
+  use Swell.Workflow.Engine.Workers.WorkerHelper
   alias Swell.Workflow.Definition.StepDef
+  alias Swell.Workflow.Messages.Step
+  alias Swell.Workflow.Messages.Workflow
+  alias Swell.Workflow.Messages.Transition
+  alias Swell.Workflow.Messages.Done
   alias Swell.Workflow.Engine.WorkflowError
   alias Swell.Workflow.Engine.ActionExecutor
 
@@ -16,30 +20,44 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
     init_consumer(binding_keys, queue)
   end
 
-  def consume({:step, {id, workflow_def, step_name, document} = step}, channel) do
+  def consume({:step, step} = message, channel) do
     try do
       execute_step(step)
     rescue
       error in _ ->
-        Logger.error(inspect(error))
-        {:error, {id, workflow_def, document, step_name, error}}
+        handle_error(message, error, __STACKTRACE__)
     end
     |> publish(channel)
   end
 
-  defp execute_step({id, workflow_def, step_name, document}) do
-    step = workflow_def.steps[step_name]
-    if !step, do: raise(WorkflowError, message: "Invalid step: [#{step_name}]")
-    execute_step(id, workflow_def, step_name, step, document)
+  defp execute_step(%Step{step_name: step_name, workflow: %Workflow{definition: workflow_def}} = step) do
+    step_def = workflow_def.steps[step_name]
+    if !step_def, do: raise(WorkflowError, message: "Invalid step: [#{step_name}]")
+    do_execute_step(step, step_def)
   end
 
-  defp execute_step(id, workflow_def, step_name, %StepDef{action: action}, document) do
+  defp do_execute_step(%Step{document: document, workflow: workflow} = step, %StepDef{action: action}) do
     {result, document} = ActionExecutor.execute(action, document)
-    {:transition, {id, workflow_def, document, step_name, result}}
+    {
+      :transition,
+      %Transition{
+        step_name: step.step_name,
+        workflow: workflow,
+        document: document,
+        result: result
+      }
+    }
   end
 
-  defp execute_step(id, workflow_def, _step_name, :done, document) do
-    {:done, {id, workflow_def, document}}
+  defp do_execute_step(%Step{document: document, workflow: workflow}, final_result) when is_atom(final_result) do
+    {
+      :done,
+      %Done{
+        workflow: workflow,
+        document: document,
+        result: final_result
+      }
+    }
   end
-
 end
+
