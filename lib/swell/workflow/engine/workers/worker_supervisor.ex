@@ -1,24 +1,21 @@
 defmodule Swell.Workflow.Engine.Workers.WorkerSupervisor do
   use DynamicSupervisor
-  alias Swell.Workflow.Engine.Workers.StepWorker
-  alias Swell.Workflow.Engine.Workers.TransitionWorker
   require Logger
   @me __MODULE__
 
-  def start_link(worker_count) do
-    DynamicSupervisor.start_link(@me, worker_count, name: @me)
+  def start_link(_) do
+    DynamicSupervisor.start_link(@me, nil, name: @me)
   end
 
   def init(_) do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  def start_workers(count \\ 1) do
-    for _ <- 1..count do
-      {:ok, _pid} = DynamicSupervisor.start_child(@me, {StepWorker, {~w{step}, "steps"}})
-
-      {:ok, _pid} =
-        DynamicSupervisor.start_child(@me, {TransitionWorker, {~w{transition}, "transitions"}})
+  def start_workers({module, opts, worker_count} = conf)
+      when is_atom(module) and is_tuple(opts) and is_integer(worker_count) do
+    Logger.debug(fn -> "Starting workers: #{inspect(conf)}" end)
+    for _ <- 1..worker_count do
+      {:ok, _pid} = DynamicSupervisor.start_child(@me, {module, opts})
     end
   end
 end

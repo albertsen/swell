@@ -7,23 +7,23 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
   require Logger
   @me __MODULE__
 
-  def start_link(worker_count) do
-    GenServer.start_link(@me, worker_count, name: @me)
+  def start_link(_) do
+    GenServer.start_link(@me, nil, name: @me)
   end
 
-  def execute(workflow_def, document) do
+  def execute(workflow_def, %{id: _id} = document) do
     GenServer.call(@me, {:execute, workflow_def, document})
   end
 
   @impl GenServer
-  def init(worker_count) do
+  def init(_) do
     send(self(), :start_workers)
     channel = Swell.Queue.Manager.open_channel()
-    {:ok, {worker_count, channel}}
+    {:ok, channel}
   end
 
   @impl GenServer
-  def handle_call({:execute, workflow_def, document}, _from, {worker_count, channel}) do
+  def handle_call({:execute, workflow_def, document}, _from, channel) do
     id = UUID.uuid4()
 
     message = {
@@ -39,12 +39,13 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
     }
 
     publish(message, channel)
-    {:reply, id, {worker_count, channel}}
+    {:reply, id, channel}
   end
 
   @impl GenServer
-  def handle_info(:start_workers, {worker_count, channel}) do
-    WorkerSupervisor.start_workers(worker_count)
-    {:noreply, {worker_count, channel}}
+  def handle_info(:start_workers, channel) do
+    Application.get_env(:swell, :workers)
+    |> Enum.each(&(WorkerSupervisor.start_workers(&1)))
+    {:noreply, channel}
   end
 end

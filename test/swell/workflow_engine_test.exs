@@ -130,7 +130,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    WorkflowExecutor.execute(workflow, %{})
+    WorkflowExecutor.execute(workflow, %{id: :boom})
 
     await_result(
       ~w{error},
@@ -153,7 +153,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    WorkflowExecutor.execute(workflow, %{})
+    WorkflowExecutor.execute(workflow, %{id: :nonexisting_transition})
 
     await_result(
       ~w{error},
@@ -181,7 +181,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    WorkflowExecutor.execute(workflow, %{})
+    WorkflowExecutor.execute(workflow, %{id: :nonexisting_step})
 
     await_result(
       ~w{error},
