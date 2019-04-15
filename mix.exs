@@ -24,6 +24,8 @@ defmodule Swell.MixProject do
     [
       {:amqp, "~> 1.1"},
       {:uuid, "~> 1.1"},
+      {:ecto_sql, "~> 3.0"},
+      {:postgrex, ">= 0.0.0"},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false}
     ]
   end

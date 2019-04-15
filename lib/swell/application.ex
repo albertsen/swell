@@ -9,8 +9,9 @@ defmodule Swell.Application do
     # List all child processes to be supervised
     children = [
       Swell.Queue.Manager,
+      Swell.DB.Repo,
       Swell.Workflow.Engine.Workers.WorkerSupervisor,
-      {Swell.Workflow.Engine.WorkflowExecutor, 1000}
+      Swell.Workflow.Engine.WorkflowExecutor,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
