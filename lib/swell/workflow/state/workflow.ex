@@ -1,6 +1,6 @@
 defmodule Swell.Workflow.State.Workflow do
-  @enforce_keys [:id, :definition, :document, :step, :result]
-  defstruct id: nil, definition: nil, document: nil, step: nil, result: nil, status: nil
+  @enforce_keys [:id, :definition, :document]
+  defstruct id: nil, definition: nil, document: nil, step: nil, result: nil, status: nil, error: nil
 
   @type t :: %Swell.Workflow.State.Workflow{
           id: String.t(),
@@ -8,6 +8,7 @@ defmodule Swell.Workflow.State.Workflow do
           document: map(),
           step: atom(),
           result: atom(),
-          status: :processing | :waiting | :error
+          error: Swell.Workflow.State.Workflow.t(),
+          status: :processing | :waiting | :error | :done
         }
 end

@@ -2,11 +2,9 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
   use GenServer
   use Swell.Queue.Consumer
   use Swell.Queue.Publisher
-  use Swell.Workflow.Engine.Workers.WorkerHelper
+  use Swell.Workflow.Engine.Workers.ErrorHelper
   alias Swell.Workflow.Definition.StepDef
-  alias Swell.Workflow.Messages.Transition
-  alias Swell.Workflow.Messages.Workflow
-  alias Swell.Workflow.Messages.Step
+  alias Swell.Workflow.State.Workflow
   alias Swell.Workflow.Engine.WorkflowError
 
   def start_link(queue) do
@@ -18,45 +16,32 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
     init_consumer(binding_keys, queue)
   end
 
-  def consume({:transition, transition} = message, channel) do
+  def consume({:transition, workflow} = payload, channel) do
     try do
-      transition(transition)
+      transition(workflow)
     rescue
       error in _ ->
-        handle_error(message, error, __STACKTRACE__)
+        handle_error(payload, error, __STACKTRACE__)
     end
     |> publish(channel)
   end
 
-  defp transition(%Transition{
-         step_name: step_name,
-         workflow: %Workflow{definition: workflow_def} = workflow,
-         document: document,
-         result: result
-       }) do
-    step_def = workflow_def.steps[step_name]
-    if !step_def, do: raise(WorkflowError, message: "Invalid step: [#{step_name}]")
-    next_step_name = next_step_name(step_name, step_def, result)
-
-    {
-      :step,
-      %Step{
-        step_name: next_step_name,
-        workflow: workflow,
-        document: document
-      }
-    }
+  defp transition(%Workflow{definition: definition, step: step, result: result} = workflow) do
+    step_def = definition.steps[step]
+    if !step_def, do: raise(WorkflowError, message: "Invalid step: [#{step}]")
+    next_step = next_step(step, step_def, result)
+    {:step, %Workflow{workflow | step: next_step}}
   end
 
-  defp next_step_name(current_step_name, %StepDef{transitions: transitions}, result) do
-    next_step_name = transitions[result]
+  defp next_step(current_step, %StepDef{transitions: transitions}, result) do
+    next_step = transitions[result]
 
-    if !next_step_name,
+    if !next_step,
       do:
         raise(WorkflowError,
-          message: "No transition in step [#{current_step_name}] for result with code [#{result}]"
+          message: "No transition in step [#{current_step}] for result with code [#{result}]"
         )
 
-    next_step_name
+    next_step
   end
 end

@@ -9,7 +9,7 @@ defmodule Swell.Application do
     # List all child processes to be supervised
     children = [
       Swell.Queue.Manager,
-      Swell.DB.Repo,
+      Swell.DB.Manager,
       Swell.Workflow.Engine.Workers.WorkerSupervisor,
       Swell.Workflow.Engine.WorkflowExecutor,
     ]

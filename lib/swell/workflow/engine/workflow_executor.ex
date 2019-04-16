@@ -2,8 +2,7 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
   use GenServer
   use Swell.Queue.Publisher
   alias Swell.Workflow.Engine.Workers.WorkerSupervisor
-  alias Swell.Workflow.Messages.Step
-  alias Swell.Workflow.Messages.Workflow
+  alias Swell.Workflow.State.Workflow
   require Logger
   @me __MODULE__
 
@@ -28,13 +27,12 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
 
     message = {
       :step,
-      %Step{
-        step_name: :start,
-        workflow: %Workflow{
-          id: id,
-          definition: workflow_def
-        },
-        document: document
+      %Workflow{
+        step: :start,
+        id: id,
+        definition: workflow_def,
+        document: document,
+        status: :processing,
       }
     }
 
@@ -45,7 +43,8 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
   @impl GenServer
   def handle_info(:start_workers, channel) do
     Application.get_env(:swell, :workers)
-    |> Enum.each(&(WorkerSupervisor.start_workers(&1)))
+    |> Enum.each(&WorkerSupervisor.start_workers(&1))
+
     {:noreply, channel}
   end
 end
