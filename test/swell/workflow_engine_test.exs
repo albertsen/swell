@@ -1,7 +1,3 @@
-defmodule TestData do
-  defstruct id: nil, status: nil, time_updated: nil, input: nil, output: nil
-end
-
 defmodule Swell.WorkflowExecutorTest.Functions do
   def validate(doc) do
     {:ok, %{doc | status: :validated}}
@@ -39,6 +35,7 @@ defmodule Swell.WorkflowExecutorTest do
   alias Swell.Workflow.State.Error
   alias Swell.Workflow.Definition.WorkflowDef
   alias Swell.Workflow.Definition.StepDef
+  alias Swell.Workflow.Definition.FunctionActionDef
   alias Swell.Workflow.Engine.WorkflowExecutor
   require Logger
 
@@ -49,25 +46,25 @@ defmodule Swell.WorkflowExecutorTest do
       id: :test_workflow,
       steps: %{
         start: %StepDef{
-          action: {Swell.WorkflowExecutorTest.Functions, :validate},
+          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :validate},
           transitions: %{
             ok: :touch
           }
         },
         touch: %StepDef{
-          action: {Swell.WorkflowExecutorTest.Functions, :touch},
+          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :touch},
           transitions: %{
             ok: :calculate
           }
         },
         calculate: %StepDef{
-          action: {Swell.WorkflowExecutorTest.Functions, :calculate},
+          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :calculate},
           transitions: %{
             ok: :sleep
           }
         },
         sleep: %StepDef{
-          action: {Swell.WorkflowExecutorTest.Functions, :sleep},
+          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :sleep},
           transitions: %{
             ok: :end
           }
@@ -76,7 +73,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1
+    count = 1000
 
     1..count
     |> Enum.each(fn i ->
@@ -121,7 +118,7 @@ defmodule Swell.WorkflowExecutorTest do
       id: :test_workflow,
       steps: %{
         start: %StepDef{
-          action: {Swell.WorkflowExecutorTest.Functions, :boom},
+          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :boom},
           transitions: %{
             ok: :end
           }
@@ -144,7 +141,7 @@ defmodule Swell.WorkflowExecutorTest do
       id: :test_workflow,
       steps: %{
         start: %StepDef{
-          action: {Swell.WorkflowExecutorTest.Functions, :nonexisting_transition},
+          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :nonexisting_transition},
           transitions: %{
             ok: :end
           }
@@ -172,7 +169,7 @@ defmodule Swell.WorkflowExecutorTest do
       id: :test_workflow,
       steps: %{
         start: %StepDef{
-          action: {Swell.WorkflowExecutorTest.Functions, :ok},
+          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :ok},
           transitions: %{
             ok: :nonexisting
           }

@@ -26,7 +26,8 @@ defmodule Swell.MixProject do
       {:uuid, "~> 1.1"},
       {:postgrex, ">= 0.0.0"},
       {:poolboy, "~>1.5.0"},
-      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
+      {:jason, "~> 1.1"}
     ]
   end
 end

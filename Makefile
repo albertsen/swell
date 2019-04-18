@@ -15,7 +15,7 @@ test:
 createdb:
 	$(PSQL) postgres -f sql/create_db.sql 
 
-creatdbusers:
+createdbusers:
 	$(PSQL) $(DB_NAME) -f sql/create_users.sql
 
 dropdbtables:

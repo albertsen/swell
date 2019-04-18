@@ -1,12 +1,13 @@
 defmodule Swell.DB.Manager do
   use GenServer
+  require Logger
   @me __MODULE__
 
   def start_link(_) do
     GenServer.start_link(@me, nil, name: @me)
   end
 
-  def query(statement, params, opts \\ {}) do
+  def query(statement, params, opts \\ []) do
     GenServer.call(@me, {:query, statement, params, opts})
   end
 
@@ -19,7 +20,7 @@ defmodule Swell.DB.Manager do
 
   @impl GenServer
   def handle_call({:query, statement, params, opts}, _from, conn) do
-    res = Postgrex.query(conn, statement, params, opts)
+    res = Postgrex.query!(conn, statement, params, opts)
     {:reply, res, conn}
   end
 

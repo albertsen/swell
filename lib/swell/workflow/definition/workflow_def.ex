@@ -1,5 +1,6 @@
 defmodule Swell.Workflow.Definition.WorkflowDef do
   @enforce_keys [:id, :steps]
+  @derive {Jason.Encoder, only: [:id, :steps]}
   defstruct id: nil, steps: nil
 
   @type t :: %Swell.Workflow.Definition.WorkflowDef{
