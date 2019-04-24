@@ -27,13 +27,12 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
 
     message = {
       :step,
-      %Workflow{
-        step: :start,
-        id: id,
+      Workflow.new(
         definition: workflow_def,
         document: document,
-        status: :processing,
-      }
+        step: :start,
+        status: :processing
+      )
     }
 
     publish(message, channel)

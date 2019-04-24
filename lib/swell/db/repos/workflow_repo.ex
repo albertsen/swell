@@ -1,31 +1,19 @@
-defmodule Swell.Workflow.Engine.Workers.PersistenceWorker do
-  use GenServer
-  use Swell.Queue.Consumer
+defmodule Swell.DB.Repos.WorkflowRepo do
+  alias Swell.Workflow.State.Workflow
+  require Logger
 
-  def start_link(queue) do
-    GenServer.start_link(__MODULE__, queue)
-  end
-
-  @impl GenServer
-  def init({binding_keys, queue}) do
-    init_consumer(binding_keys, queue)
-  end
-
-  def consume({_routing_key, workflow}, _channel) do
-    save_workflow(workflow)
-  end
-
-  defp save_workflow(workflow) do
+  def save(workflow) do
+    workflow = Workflow.touch(workflow)
+    Logger.debug(fn -> inspect(workflow) end)
     Swell.DB.Manager.query(
       """
         INSERT INTO workflows
           (id, definition, document_id, document, step,
-          waiting_for, status, result, error)
+          waiting_for, status, result, error, time_created, time_updated)
         VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         ON CONFLICT (id)
         DO UPDATE SET
-          time_updated = CURRENT_TIMESTAMP,
           definition = $2,
           document_id = $3,
           document = $4,
@@ -33,7 +21,8 @@ defmodule Swell.Workflow.Engine.Workers.PersistenceWorker do
           waiting_for = $6,
           status = $7,
           result = $8,
-          error = $9
+          error = $9,
+          time_updated = $11
       """,
       [
         UUID.string_to_binary!(workflow.id),
@@ -44,11 +33,12 @@ defmodule Swell.Workflow.Engine.Workers.PersistenceWorker do
         to_sql_value(workflow.waiting_for),
         to_sql_value(workflow.status),
         to_sql_value(workflow.result),
-        to_sql_value(workflow.error)
+        to_sql_value(workflow.error),
+        to_sql_value(workflow.time_created),
+        to_sql_value(workflow.time_updated)
       ]
     )
-
-    :ok
+    workflow
   end
 
   defp to_sql_value(value) when is_atom(value), do: to_string(value)

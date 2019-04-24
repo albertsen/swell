@@ -4,7 +4,7 @@ defmodule Swell.WorkflowExecutorTest.Functions do
   end
 
   def touch(doc) do
-    {:ok, %{doc | time_updated: DateTime.utc_now()}}
+    {:ok, %{doc | time_updated: NaiveDateTime.utc_now()}}
   end
 
   def calculate(doc) do
@@ -39,7 +39,7 @@ defmodule Swell.WorkflowExecutorTest do
   alias Swell.Workflow.Engine.WorkflowExecutor
   require Logger
 
-  @before DateTime.utc_now()
+  @before NaiveDateTime.utc_now()
 
   test "executes workflow correctly" do
     workflow = %WorkflowDef{
@@ -73,7 +73,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1000
+    count = 1
 
     1..count
     |> Enum.each(fn i ->
@@ -100,10 +100,12 @@ defmodule Swell.WorkflowExecutorTest do
     end
   end
 
-  def check_success({:done, %Workflow{document: document, result: result}}, count) do
+  def check_success({:done, %Workflow{document: document, result: result} = workflow}, count) do
     Logger.debug("Count: #{count}")
     assert document.status == :validated
-    assert :lt == DateTime.compare(@before, document.time_updated)
+    assert :lt == NaiveDateTime.compare(workflow.time_created, workflow.time_updated)
+    assert :lt == NaiveDateTime.compare(@before, workflow.time_updated)
+    assert :lt == NaiveDateTime.compare(@before, document.time_updated)
     assert document.output == document.input * 2
     assert result == :done
 
@@ -113,90 +115,90 @@ defmodule Swell.WorkflowExecutorTest do
     end
   end
 
-  test "handles runtime exception error" do
-    workflow = %WorkflowDef{
-      id: :test_workflow,
-      steps: %{
-        start: %StepDef{
-          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :boom},
-          transitions: %{
-            ok: :end
-          }
-        },
-        end: :done
-      }
-    }
+  # test "handles runtime exception error" do
+  #   workflow = %WorkflowDef{
+  #     id: :test_workflow,
+  #     steps: %{
+  #       start: %StepDef{
+  #         action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :boom},
+  #         transitions: %{
+  #           ok: :end
+  #         }
+  #       },
+  #       end: :done
+  #     }
+  #   }
 
-    WorkflowExecutor.execute(workflow, %{id: :boom})
+  #   WorkflowExecutor.execute(workflow, %{id: :boom})
 
-    await_result(
-      ~w{error},
-      "errors",
-      check_error(:start, %RuntimeError{message: "Boom!"})
-    )
-  end
+  #   await_result(
+  #     ~w{error},
+  #     "errors",
+  #     check_error(:start, %RuntimeError{message: "Boom!"})
+  #   )
+  # end
 
-  test "throws error when a result code doesn't have a transition" do
-    workflow = %WorkflowDef{
-      id: :test_workflow,
-      steps: %{
-        start: %StepDef{
-          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :nonexisting_transition},
-          transitions: %{
-            ok: :end
-          }
-        },
-        end: :done
-      }
-    }
+  # test "throws error when a result code doesn't have a transition" do
+  #   workflow = %WorkflowDef{
+  #     id: :test_workflow,
+  #     steps: %{
+  #       start: %StepDef{
+  #         action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :nonexisting_transition},
+  #         transitions: %{
+  #           ok: :end
+  #         }
+  #       },
+  #       end: :done
+  #     }
+  #   }
 
-    WorkflowExecutor.execute(workflow, %{id: :nonexisting_transition})
+  #   WorkflowExecutor.execute(workflow, %{id: :nonexisting_transition})
 
-    await_result(
-      ~w{error},
-      "errors",
-      check_error(
-        :start,
-        %Swell.Workflow.Engine.WorkflowError{
-          message: "No transition in step [start] for result with code [nonexisting]"
-        }
-      )
-    )
-  end
+  #   await_result(
+  #     ~w{error},
+  #     "errors",
+  #     check_error(
+  #       :start,
+  #       %Swell.Workflow.Engine.WorkflowError{
+  #         message: "No transition in step [start] for result with code [nonexisting]"
+  #       }
+  #     )
+  #   )
+  # end
 
-  test "throws error when a transition points to an invalid step" do
-    workflow = %WorkflowDef{
-      id: :test_workflow,
-      steps: %{
-        start: %StepDef{
-          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :ok},
-          transitions: %{
-            ok: :nonexisting
-          }
-        },
-        end: :done
-      }
-    }
+  # test "throws error when a transition points to an invalid step" do
+  #   workflow = %WorkflowDef{
+  #     id: :test_workflow,
+  #     steps: %{
+  #       start: %StepDef{
+  #         action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :ok},
+  #         transitions: %{
+  #           ok: :nonexisting
+  #         }
+  #       },
+  #       end: :done
+  #     }
+  #   }
 
-    WorkflowExecutor.execute(workflow, %{id: :nonexisting_step})
+  #   WorkflowExecutor.execute(workflow, %{id: :nonexisting_step})
 
-    await_result(
-      ~w{error},
-      "errors",
-      check_error(
-        :nonexisting,
-        %Swell.Workflow.Engine.WorkflowError{
-          message: "Invalid step: [nonexisting]"
-        }
-      )
-    )
-  end
+  #   await_result(
+  #     ~w{error},
+  #     "errors",
+  #     check_error(
+  #       :nonexisting,
+  #       %Swell.Workflow.Engine.WorkflowError{
+  #         message: "Invalid step: [nonexisting]"
+  #       }
+  #     )
+  #   )
+  # end
 
-  defp check_error(expected_step_name, expected_error) do
-    fn ({:error, %Workflow{step: step, error: %Error{data: error_data}}}, _count) ->
-      assert step == expected_step_name
-      assert error_data == expected_error
-      {:done, 0}
-    end
-  end
+  # defp check_error(expected_step_name, expected_error) do
+  #   fn ({:error, %Workflow{step: step, error: %Error{data: error_data}}}, _count) ->
+  #     assert step == expected_step_name
+  #     assert error_data == expected_error
+  #     {:done, 0}
+  #   end
+  # end
 end

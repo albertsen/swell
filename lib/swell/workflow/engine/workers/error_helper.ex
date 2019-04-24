@@ -32,8 +32,7 @@ defmodule Swell.Workflow.Engine.Workers.ErrorHelper do
     )
   end
 
-  defp do_handle_error({routing_key, workflow}, message, data, details)
-    when is_binary(message) and is_binary(details) do
+  defp do_handle_error({routing_key, workflow}, message, data, details) do
     Logger.error(details)
     {
       :error,
@@ -41,14 +40,17 @@ defmodule Swell.Workflow.Engine.Workers.ErrorHelper do
         workflow
         | error: %Error{
             routing_key: routing_key,
-            message: message,
+            message: format(message),
             data: data,
-            details: details
+            details: format(details)
           },
           status: :error
       }
     }
   end
+
+  defp format(value) when is_binary(value), do: value
+  defp format(value), do: inspect(value)
 
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do

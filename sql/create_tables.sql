@@ -1,7 +1,7 @@
 CREATE TABLE workflows (
 	id uuid NOT NULL,
-	time_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	time_updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	time_created timestamp NOT NULL,
+	time_updated timestamp NOT NULL,
 	definition jsonb NOT NULL,
 	document_id varchar(255) NOT NULL,
 	"document" jsonb NOT NULL,

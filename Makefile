@@ -9,7 +9,7 @@ RABBITMQCTL=rabbitmqctl
 build:
 	mix compile
 
-test:
+test: purgedata
 	mix test
 
 createdb:
@@ -31,12 +31,8 @@ purgedb:
 	$(PSQL) $(DB_NAME) -c "DELETE FROM workflows"
 
 purgequeues:
-	$(RABBITMQCTL) purge_queue errors
-	$(RABBITMQCTL) purge_queue done
 	$(RABBITMQCTL) purge_queue steps
 	$(RABBITMQCTL) purge_queue transitions
-	$(RABBITMQCTL) purge_queue persistence
+	$(RABBITMQCTL) purge_queue updates
 
 purgedata: purgedb purgequeues
-
-test: purgedata test

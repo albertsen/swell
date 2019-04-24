@@ -1,8 +1,8 @@
 defmodule Swell.Queue.Manager do
   @me __MODULE__
-  @exchange "workflow"
   use GenServer
   require Logger
+  @exchange "workflow"
 
   def start_link(_) do
     GenServer.start(@me, nil, name: @me)
@@ -27,14 +27,15 @@ defmodule Swell.Queue.Manager do
     AMQP.Basic.cancel(channel, consumer_tag)
   end
 
-  def publish(channel, routing_key, payload) do
+  def publish(channel, routing_key, payload)
+    when is_binary(routing_key) or is_atom(routing_key) do
     msg = :erlang.term_to_binary(payload)
 
     :ok =
       AMQP.Basic.publish(
         channel,
         @exchange,
-        routing_key,
+        to_string(routing_key),
         msg,
         persistent: true
       )
@@ -50,7 +51,7 @@ defmodule Swell.Queue.Manager do
   def init(_) do
     {:ok, connection} = AMQP.Connection.open()
     {:ok, channel} = AMQP.Channel.open(connection)
-    AMQP.Exchange.declare(channel, "workflow", :direct)
+    AMQP.Exchange.declare(channel, @exchange, :direct)
     {:ok, connection}
   end
 
