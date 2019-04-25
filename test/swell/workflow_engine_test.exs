@@ -73,7 +73,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1
+    count = 1000
 
     1..count
     |> Enum.each(fn i ->
@@ -86,7 +86,7 @@ defmodule Swell.WorkflowExecutorTest do
       WorkflowExecutor.execute(workflow, document)
     end)
 
-    await_result(~w{done}, "done", &check_success/2, count)
+    await_result(~w{update.done}, "done", &check_success/2, count)
   end
 
   defp await_result(routing_keys, queue, func, count \\ 1) do
@@ -100,7 +100,7 @@ defmodule Swell.WorkflowExecutorTest do
     end
   end
 
-  def check_success({:done, %Workflow{document: document, result: result} = workflow}, count) do
+  def check_success({{:update, :done}, %Workflow{document: document, result: result} = workflow}, count) do
     Logger.debug("Count: #{count}")
     assert document.status == :validated
     assert :lt == NaiveDateTime.compare(workflow.time_created, workflow.time_updated)

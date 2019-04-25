@@ -35,7 +35,7 @@ defmodule Swell.Workflow.Engine.Workers.ErrorHelper do
   defp do_handle_error({routing_key, workflow}, message, data, details) do
     Logger.error(details)
     {
-      :error,
+      {:event, :error},
       %Workflow{
         workflow
         | error: %Error{

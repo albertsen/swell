@@ -31,8 +31,6 @@ purgedb:
 	$(PSQL) $(DB_NAME) -c "DELETE FROM workflows"
 
 purgequeues:
-	$(RABBITMQCTL) purge_queue steps
-	$(RABBITMQCTL) purge_queue transitions
-	$(RABBITMQCTL) purge_queue updates
+	rabbitmqadmin -f tsv -q list queues name | xargs -I qn rabbitmqadmin delete queue name=qn
 
 purgedata: purgedb purgequeues

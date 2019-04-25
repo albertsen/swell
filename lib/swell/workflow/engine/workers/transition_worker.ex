@@ -16,7 +16,7 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
     init_consumer(binding_keys, queue)
   end
 
-  def consume({:transition, workflow} = payload, channel) do
+  def consume({{:event, :transition}, workflow} = payload, channel) do
     try do
       transition(workflow)
     rescue
@@ -30,7 +30,7 @@ defmodule Swell.Workflow.Engine.Workers.TransitionWorker do
     step_def = definition.steps[step]
     if !step_def, do: raise(WorkflowError, message: "Invalid step: [#{step}]")
     next_step = next_step(step, step_def, result)
-    {:step, %Workflow{workflow | step: next_step}}
+    {{:event, :step}, %Workflow{workflow | step: next_step}}
   end
 
   defp next_step(current_step, %StepDef{transitions: transitions}, result) do

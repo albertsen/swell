@@ -13,8 +13,8 @@ defmodule Swell.Workflow.Engine.Workers.WorkflowUpdateWorker do
     init_consumer(binding_keys, queue)
   end
 
-  def consume({_routing_key, workflow}, channel) do
-    {:update, WorkflowRepo.save(workflow)}
+  def consume({{:event, key}, workflow}, channel) do
+    {{:update, key}, WorkflowRepo.save(workflow)}
     |> publish(channel)
   end
 

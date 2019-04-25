@@ -3,6 +3,7 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
   use Swell.Queue.Consumer
   use Swell.Queue.Publisher
   use Swell.Workflow.Engine.Workers.ErrorHelper
+  require Logger
   alias Swell.Workflow.Definition.StepDef
   alias Swell.Workflow.State.Workflow
   alias Swell.Workflow.Engine.WorkflowError
@@ -17,7 +18,7 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
     init_consumer(binding_keys, queue)
   end
 
-  def consume({:step, workflow} = payload, channel) do
+  def consume({{:event, :step}, workflow} = payload, channel) do
     try do
       execute_step(workflow)
     rescue
@@ -35,10 +36,10 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
 
   defp do_execute_step(%Workflow{document: document} = workflow, %StepDef{action: action}) do
     {result, document} = ActionExecutor.execute(action, document)
-    {:transition, %Workflow{workflow | result: result, document: document}}
+    {{:event, :transition}, %Workflow{workflow | result: result, document: document}}
   end
 
   defp do_execute_step(workflow, final_result) when is_map(workflow) and is_atom(final_result) do
-    {:done, %Workflow{workflow | result: final_result, status: :done}}
+    {{:event, :done}, %Workflow{workflow | result: final_result, status: :done}}
   end
 end

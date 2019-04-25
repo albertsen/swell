@@ -51,7 +51,7 @@ defmodule Swell.Queue.Manager do
   def init(_) do
     {:ok, connection} = AMQP.Connection.open()
     {:ok, channel} = AMQP.Channel.open(connection)
-    AMQP.Exchange.declare(channel, @exchange, :direct)
+    AMQP.Exchange.declare(channel, @exchange, :topic)
     {:ok, connection}
   end
 

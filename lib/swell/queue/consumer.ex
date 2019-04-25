@@ -1,5 +1,6 @@
 defmodule Swell.Queue.Consumer do
   @callback consume(map(), AMQP.Channel.t()) :: :ok
+  require Logger
 
   def init_consumer(routing_keys, queue) do
     channel = Swell.Queue.Manager.open_channel()

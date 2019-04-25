@@ -23,20 +23,21 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
 
   @impl GenServer
   def handle_call({:execute, workflow_def, document}, _from, channel) do
-    id = UUID.uuid4()
-
-    message = {
-      :step,
+    workflow =
       Workflow.new(
         definition: workflow_def,
         document: document,
         step: :start,
         status: :processing
       )
+
+    message = {
+      {:event, :step},
+      workflow
     }
 
     publish(message, channel)
-    {:reply, id, channel}
+    {:reply, workflow.id, channel}
   end
 
   @impl GenServer

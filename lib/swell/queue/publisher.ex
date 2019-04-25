@@ -1,9 +1,9 @@
 defmodule Swell.Queue.Publisher do
   require Logger
 
-  def publish({routing_key, _payload} = message, channel) do
+  def publish({{type, key}, _payload} = message, channel) do
     Logger.debug(fn -> "Publishing message: #{inspect(message)}" end)
-    Swell.Queue.Manager.publish(channel, routing_key, message)
+    Swell.Queue.Manager.publish(channel, "#{type}.#{key}", message)
   end
 
   defmacro __using__(opts) do
