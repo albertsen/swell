@@ -19,14 +19,18 @@ defmodule Swell.DB.Query do
 
   def init({name, statement}) when is_binary(name) and is_binary(statement) do
     query = Connection.prepare(name, statement)
-    Logger.debug("Prepared query: #{inspect(query)}")
     {:ok, query}
   end
 
   @impl GenServer
   def handle_call({:execute, params, opts}, _from, query) do
-    Logger.debug("Executing query: #{inspect(query)} - with params #{inspect(params)}")
+    params = Enum.map(params, &to_sql_value(&1))
     res = Connection.execute(query, params, opts)
     {:reply, res, query}
   end
+
+  defp to_sql_value(value) when is_atom(value), do: to_string(value)
+  defp to_sql_value(value), do: value
+
+
 end

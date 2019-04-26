@@ -31,6 +31,7 @@ end
 
 defmodule Swell.WorkflowExecutorTest do
   use ExUnit.Case
+  alias Swell.DB.Repos.WorkflowRepo
   alias Swell.Workflow.State.Workflow
   alias Swell.Workflow.State.Error
   alias Swell.Workflow.Definition.WorkflowDef
@@ -73,7 +74,7 @@ defmodule Swell.WorkflowExecutorTest do
       }
     }
 
-    count = 1000
+    count = 1
 
     1..count
     |> Enum.each(fn i ->
@@ -108,6 +109,8 @@ defmodule Swell.WorkflowExecutorTest do
     assert :lt == NaiveDateTime.compare(@before, document.time_updated)
     assert document.output == document.input * 2
     assert result == :done
+    saved_workflow = WorkflowRepo.find_by_id(workflow.id)
+    assert saved_workflow == workflow
 
     case count do
       1 -> {:done, 0}

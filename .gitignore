@@ -24,3 +24,4 @@ swell-*.tar
 .elixir_ls
 /playground/
 *.log
+/data/
