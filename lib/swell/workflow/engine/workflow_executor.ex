@@ -10,7 +10,7 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
     GenServer.start_link(@me, nil, name: @me)
   end
 
-  def execute(workflow_def, %{id: _id} = document) do
+  def execute(workflow_def, %{"id" => _id} = document) do
     GenServer.call(@me, {:execute, workflow_def, document})
   end
 
@@ -27,8 +27,8 @@ defmodule Swell.Workflow.Engine.WorkflowExecutor do
       Workflow.new(
         definition: workflow_def,
         document: document,
-        step: :start,
-        status: :processing
+        step: "start",
+        status: "processing"
       )
 
     message = {

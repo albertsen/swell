@@ -44,7 +44,7 @@ defmodule Swell.Workflow.Engine.Workers.ErrorHelper do
             data: data,
             details: format(details)
           },
-          status: :error
+          status: "error"
       }
     }
   end

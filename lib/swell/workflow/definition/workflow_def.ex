@@ -7,5 +7,5 @@ defmodule Swell.Workflow.Definition.WorkflowDef do
           id: String.t(),
           steps: steps()
         }
-  @type steps :: %{required(atom()) => Swell.Workflow.Definition.StepDef.t() | atom()}
+  @type steps :: %{required(String.t()) => Swell.Workflow.Definition.StepDef.t() | String.t()}
 end

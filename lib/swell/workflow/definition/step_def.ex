@@ -5,6 +5,6 @@ defmodule Swell.Workflow.Definition.StepDef do
 
   @type t :: %Swell.Workflow.Definition.StepDef{
           action: Swell.Workflow.Definition.FunctionAcionDef.t(),
-          transitions: %{atom() => atom()}
+          transitions: %{String.t() => String.t()}
         }
 end

@@ -31,11 +31,11 @@ defmodule Swell.Workflow.State.Workflow do
           time_updated: NaiveDateTime.t(),
           definition: Swell.Workflow.Definition.Workflow.t(),
           document: map(),
-          step: atom(),
-          result: atom(),
-          waiting_for: atom(),
+          step: String.t(),
+          result: String.t(),
+          waiting_for: String.t(),
           error: Swell.Workflow.State.Workflow.t(),
-          status: :processing | :waiting | :error | :done
+          status: String.t()
         }
 
   def new([{:definition, _}, {:document, _} | _] = values) do

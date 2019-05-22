@@ -2,6 +2,7 @@ defmodule Swell.DB.Repos.WorkflowRepo do
   use GenServer
   alias Swell.DB.Query
   alias Swell.Workflow.State.Workflow
+  alias Swell.DB.Repos.WorkflowRepo.WorkflowDefConverter
   alias Postgrex.Result
   require Logger
   @save_workflow :save_workflow
@@ -47,7 +48,7 @@ defmodule Swell.DB.Repos.WorkflowRepo do
       [
         UUID.string_to_binary!(workflow.id),
         workflow.definition,
-        workflow.document.id,
+        workflow.document["id"],
         workflow.document,
         workflow.step,
         workflow.waiting_for,
@@ -90,7 +91,24 @@ defmodule Swell.DB.Repos.WorkflowRepo do
     {:ok, _pid} =
       Query.start_link({
         @find_workflow_by_id,
-        "SELECT * FROM workflows WHERE id = $1"
+        """
+          SELECT
+            id,
+            definition,
+            document_id,
+            document,
+            step,
+            waiting_for,
+            status,
+            result,
+            error,
+            time_created,
+            time_updated
+          FROM
+            workflows
+          WHERE
+          id = $1
+        """
       })
 
     {:noreply, nil}
@@ -109,14 +127,58 @@ defmodule Swell.DB.Repos.WorkflowRepo do
     |> Enum.reduce(
       %Workflow{},
       fn {name, value}, workflow ->
-        value =
-          case name do
-            v when v in ~w{step result status waiting_for}a -> String.to_atom(value)
-            _ -> value
-          end
-
-        Map.put(workflow, name, value)
+        Map.put(workflow, name, convert_value(name, value))
       end
     )
   end
+
+  defp convert_value(:id, value),
+    do: UUID.binary_to_string!(value)
+
+  defp convert_value(:definition, value), do: WorkflowDefConverter.convert(value)
+
+  defp convert_value(_name, ""), do: nil
+
+  defp convert_value(_name, value), do: value
+end
+
+defmodule Swell.DB.Repos.WorkflowRepo.WorkflowDefConverter do
+  alias Swell.Workflow.Definition.WorkflowDef
+  alias Swell.Workflow.Definition.StepDef
+  alias Swell.Workflow.Definition.FunctionActionDef
+
+  def convert(map) do
+    %WorkflowDef{
+      id: map["id"],
+      steps: convert_steps(map["steps"])
+    }
+  end
+
+  def convert_steps(map) do
+    Map.keys(map)
+    |> Enum.reduce(
+      %{},
+      fn key, steps ->
+        Map.put(
+          steps,
+          key,
+          convert_step(map[key])
+        )
+      end
+    )
+  end
+
+  def convert_step(step) when is_map(step) do
+    action = step["action"]
+
+    %StepDef{
+      action: %FunctionActionDef{
+        module: String.to_atom(action["module"]),
+        function: String.to_atom(action["function"])
+      },
+      transitions: step["transitions"]
+    }
+  end
+
+  def convert_step(step), do: step
 end

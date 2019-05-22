@@ -1,19 +1,15 @@
 defmodule Swell.WorkflowExecutorTest.Functions do
   def validate(doc) do
-    {:ok, %{doc | status: :validated}}
-  end
-
-  def touch(doc) do
-    {:ok, %{doc | time_updated: NaiveDateTime.utc_now()}}
+    {"ok", %{doc | "status" => "validated"}}
   end
 
   def calculate(doc) do
-    {:ok, %{doc | output: doc.input * 2}}
+    {"ok", %{doc | "output" => doc["input"] * 2}}
   end
 
   def sleep(doc) do
     :timer.sleep(50)
-    {:ok, doc}
+    {"ok", doc}
   end
 
   def boom(_doc) do
@@ -21,11 +17,11 @@ defmodule Swell.WorkflowExecutorTest.Functions do
   end
 
   def nonexisting_transition(doc) do
-    {:nonexisting, doc}
+    {"nonexisting", doc}
   end
 
   def ok(doc) do
-    {:ok, doc}
+    {"ok", doc}
   end
 end
 
@@ -44,33 +40,27 @@ defmodule Swell.WorkflowExecutorTest do
 
   test "executes workflow correctly" do
     workflow = %WorkflowDef{
-      id: :test_workflow,
+      id: "test_workflow",
       steps: %{
-        start: %StepDef{
+        "start" => %StepDef{
           action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :validate},
           transitions: %{
-            ok: :touch
+            "ok" => "calculate"
           }
         },
-        touch: %StepDef{
-          action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :touch},
-          transitions: %{
-            ok: :calculate
-          }
-        },
-        calculate: %StepDef{
+        "calculate" => %StepDef{
           action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :calculate},
           transitions: %{
-            ok: :sleep
+            "ok" => "sleep"
           }
         },
-        sleep: %StepDef{
+        "sleep" => %StepDef{
           action: %FunctionActionDef{module: Swell.WorkflowExecutorTest.Functions, function: :sleep},
           transitions: %{
-            ok: :end
+            "ok" => "end"
           }
         },
-        end: :done
+        "end" => "done"
       }
     }
 
@@ -78,10 +68,11 @@ defmodule Swell.WorkflowExecutorTest do
 
     1..count
     |> Enum.each(fn i ->
-      document = %TestData{
-        id: "123",
-        status: :new,
-        input: i
+      document = %{
+        "id" => "123",
+        "status" => "new",
+        "input" => i,
+        "output" => nil
       }
 
       WorkflowExecutor.execute(workflow, document)
@@ -103,12 +94,11 @@ defmodule Swell.WorkflowExecutorTest do
 
   def check_success({{:update, :done}, %Workflow{document: document, result: result} = workflow}, count) do
     Logger.debug("Count: #{count}")
-    assert document.status == :validated
+    assert document["status"] == "validated"
     assert :lt == NaiveDateTime.compare(workflow.time_created, workflow.time_updated)
     assert :lt == NaiveDateTime.compare(@before, workflow.time_updated)
-    assert :lt == NaiveDateTime.compare(@before, document.time_updated)
-    assert document.output == document.input * 2
-    assert result == :done
+    assert document["output"] == document["input"] * 2
+    assert result == "done"
     saved_workflow = WorkflowRepo.find_by_id(workflow.id)
     assert saved_workflow == workflow
 

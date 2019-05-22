@@ -39,7 +39,7 @@ defmodule Swell.Workflow.Engine.Workers.StepWorker do
     {{:event, :transition}, %Workflow{workflow | result: result, document: document}}
   end
 
-  defp do_execute_step(workflow, final_result) when is_map(workflow) and is_atom(final_result) do
-    {{:event, :done}, %Workflow{workflow | result: final_result, status: :done}}
+  defp do_execute_step(workflow, final_result) when is_map(workflow) and is_binary(final_result) do
+    {{:event, :done}, %Workflow{workflow | result: final_result, status: "done"}}
   end
 end
