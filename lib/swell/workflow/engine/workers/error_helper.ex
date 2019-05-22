@@ -39,7 +39,7 @@ defmodule Swell.Workflow.Engine.Workers.ErrorHelper do
       %Workflow{
         workflow
         | error: %Error{
-            routing_key: routing_key,
+            routing_key: inspect(routing_key),
             message: format(message),
             data: data,
             details: format(details)
