@@ -2,9 +2,9 @@ defmodule Swell.Queue.Consumer do
   @callback consume(map(), AMQP.Channel.t()) :: :ok
   require Logger
 
-  def init_consumer(routing_keys, queue) do
+  def init_consumer(queue) do
     channel = Swell.Queue.Manager.open_channel()
-    Swell.Queue.Manager.consume(channel, routing_keys, queue)
+    Swell.Queue.Manager.consume(channel, queue)
     {:ok, channel}
   end
 
@@ -13,14 +13,15 @@ defmodule Swell.Queue.Consumer do
       import Swell.Queue.Consumer
       require Logger
 
-      def handle_info({:basic_deliver, payload, meta}, channel) do
+      def handle_info({:basic_deliver, payload, meta}, {channel, state}) do
         :ok =
-          :erlang.binary_to_term(payload)
+          payload
+          |> Jason.decode!(keys: :atoms)
           |> log_message()
-          |> consume(channel)
+          |> consume({channel, state})
 
         Swell.Queue.Manager.ack(channel, meta.delivery_tag)
-        {:noreply, channel}
+        {:noreply, {channel, state}}
       end
 
       defp log_message(message) do

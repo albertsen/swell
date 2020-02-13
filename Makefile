@@ -12,25 +12,12 @@ build:
 test: purgedata
 	mix test
 
-createdb:
-	$(PSQL) postgres -f sql/create_db.sql 
-
-createdbusers:
-	$(PSQL) $(DB_NAME) -f sql/create_users.sql
-
-dropdbtables:
-	$(PSQL) $(DB_NAME) -c "DROP TABLE workflows"
-
-createdbtables:
-	$(PSQL) -U $(DB_USER) $(DB_NAME) -f sql/create_tables.sql
-
-dropdb:
-	$(PSQL) postgres -c "DROP DATABASE swell"
-
 purgedb:
-	$(PSQL) $(DB_NAME) -c "DELETE FROM workflows"
+	mongo swell --quiet --eval "db.orders.deleteMany({})" 
 
 purgequeues:
 	rabbitmqadmin -f tsv -q list queues name | xargs -I qn rabbitmqadmin delete queue name=qn
+	rabbitmqadmin -f tsv -q list bindings name | xargs -I qn rabbitmqadmin delete binding name=qn
+	rabbitmqadmin -f tsv -q list exchanges name | grep -v amq | xargs -I qn rabbitmqadmin delete exchange name=qn
 
 purgedata: purgedb purgequeues

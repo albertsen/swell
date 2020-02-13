@@ -22,12 +22,11 @@ defmodule Swell.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "~> 1.1"},
+      {:amqp, "~> 1.3"},
       {:uuid, "~> 1.1"},
-      {:postgrex, ">= 0.0.0"},
-      {:poolboy, "~>1.5.0"},
-      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
-      {:jason, "~> 1.1"}
+      {:jason, "~> 1.1"},
+      {:mongodb, ">= 0.0.0"},
+      {:poolboy, ">= 0.0.0"}
     ]
   end
 end
