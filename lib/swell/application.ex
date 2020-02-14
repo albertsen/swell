@@ -3,14 +3,23 @@ defmodule Swell.Application do
   import Supervisor.Spec
 
   def start(_type, _args) do
-    children = [
-      Swell.Queue.Manager,
-      worker(Mongo, [[name: :swell, database: "swell", pool_size: 2]]),
-      Swell.Event.WorkerSupervisor,
-      Swell.Event.EventService
-    ]
+    Supervisor.start_link(children(), opts())
+  end
 
-    opts = [strategy: :one_for_one, name: Swell.Supervisor]
-    Supervisor.start_link(children, opts)
+  defp children() do
+    [
+      # Swell.Queue.Manager,
+      worker(Mongo, [[name: :swell, database: "swell", pool_size: 2]]),
+      # Swell.Event.WorkerSupervisor,
+      # Swell.Event.EventService,
+      Swell.WorkflowEngine.WorkflowService.Endpoint
+    ]
+  end
+
+  defp opts() do
+    [
+      strategy: :one_for_one,
+      name: Swell.Supervisor
+    ]
   end
 end

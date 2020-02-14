@@ -1,5 +1,5 @@
 defmodule Swell.Event do
-  @derive Jason.Encoder
+  # @derive Jason.Encoder
   defstruct [:id, :type, :timestamp, :payload]
   require Logger
   alias Swell.Event

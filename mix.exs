@@ -22,11 +22,14 @@ defmodule Swell.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "~> 1.3"},
+      {:amqp, "~> 1.4"},
       {:uuid, "~> 1.1"},
-      {:jason, "~> 1.1"},
-      {:mongodb, ">= 0.0.0"},
-      {:poolboy, ">= 0.0.0"}
+      {:mongodb, "~> 0.5"},
+      {:poolboy, "~> 1.5"},
+      {:plug, "~> 1.9"},
+      {:cowboy, "~> 2.7"},
+      {:plug_cowboy, "~> 2.1"},
+      {:jason, "~> 1.1"}
     ]
   end
 end
