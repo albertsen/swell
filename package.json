@@ -1,0 +1,29 @@
+{
+  "name": "swell",
+  "version": "0.0.1",
+  "description": "A workflow engine",
+  "author": "Juergen Albertsen <mail@juergenalbertsen.de>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "ajv": "^6",
+    "asv": "^1",
+    "bson-ext": "^2",
+    "cors": "^2",
+    "dateformat": "^3",
+    "express": "^4",
+    "express-async-handler": "^1",
+    "glob": "^7",
+    "glob-promise": "^3",
+    "http-status-codes": "^1.4.0",
+    "mkdirp": "^1",
+    "mongodb": "^3",
+    "uuid": "^3",
+    "winston": "^3"
+  },
+  "devDependencies": {
+    "chai": "^4",
+    "chai-http": "^4",
+    "chakram": "^1",
+    "mocha": "^7"
+  }
+}

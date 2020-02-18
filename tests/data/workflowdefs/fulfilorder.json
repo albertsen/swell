@@ -1,7 +1,7 @@
 {
-    "id": "fulfilorderx",
+    "id": "fulfilorder1",
     "description": "Example order fulfilment process",
-    "action_handlers": {
+    "actionHandlers": {
         "start": {
             "type": "endpoint",
             "url": "http://commandhandler/handle?orderStatus=CREATED&event=started"
@@ -45,8 +45,7 @@
             "shipmentPrepared": "ship"
         },
         "ship": {
-            "shipped": "orderCompleted"
-        },
-        "error": "handleError"
+            "shipped": "done"
+        }
     }
 }
