@@ -1,10 +1,10 @@
 const HttpStatus = require('http-status-codes');
-const ValidationError = require("./errors/ValidationError");
-const NotFoundError = require("./errors/NotFoundError");
-const JSONValidationError = require("./errors/JSONValidationError");
-const ConflictError = require("./errors/ConflictError");
-const log = require("./log");
-const sendStatus = require("./rest").sendStatus;
+const ValidationError = require("lib/errors/ValidationError");
+const NotFoundError = require("lib/errors/NotFoundError");
+const JSONValidationError = require("lib/errors/JSONValidationError");
+const ConflictError = require("lib/errors/ConflictError");
+const log = require("lib/log");
+const sendStatus = require("lib/rest").sendStatus;
 
 
 const errorMappings = (function(mappings) {

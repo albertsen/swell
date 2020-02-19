@@ -1,8 +1,8 @@
-const db = require("../db")
-const log = require("../log");
-const ValidationError = require("../errors/ValidationError");
-const ConflictError = require("../errors/ConflictError");
-const NotFoundError = require("../errors/NotFoundError");
+const db = require("lib/db")
+const log = require("lib/log");
+const ValidationError = require("lib/errors/ValidationError");
+const ConflictError = require("lib/errors/ConflictError");
+const NotFoundError = require("lib/errors/NotFoundError");
 
 class GenericRepo {
 

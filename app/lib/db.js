@@ -1,6 +1,6 @@
 const MongoClient = require("mongodb").MongoClient;
-const config = require("../config/dev").db;
-const log = require("./log");
+const config = require("config/dev").db;
+const log = require("lib/log");
 
 var theDB;
 

@@ -1,5 +1,5 @@
 const path = require("path");
-const JSONValidationError = require("./errors/JSONValidationError")
+const JSONValidationError = require("lib/errors/JSONValidationError")
 const ajv = new require("ajv")();
 
 class Schema {

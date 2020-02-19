@@ -1,4 +1,7 @@
 DBNMAME=swell
+DIR=$(shell pwd)
+APP_DIR=$(DIR)/app
+export NODE_PATH=$(APP_DIR)
 
 runworkflowservice:
 	node app/services/workflowService.js

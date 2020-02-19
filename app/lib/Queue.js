@@ -1,6 +1,6 @@
 const amqp = require("amqplib")
-const config = require("../config").queue;
-const log = require("./log");
+const config = require("config").queue;
+const log = require("lib/log");
 
 class Queue {
 

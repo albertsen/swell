@@ -4,12 +4,12 @@ const HttpStatus = require('http-status-codes');
 const bodyParser = require("body-parser");
 const asyncHandler = require('express-async-handler')
 
-const workflowDefRepo = require("../lib/repos/WorkflowDefRepo");
-const jsonValidator = require("../lib/JSONValidator");
-const log = require("../lib/log");
-const errorHandler = require("../lib/errorHandler");
-const rest = require("../lib/rest");
-const queue = require("../lib/Queue");
+const workflowDefRepo = require("lib/repos/WorkflowDefRepo");
+const jsonValidator = require("lib/JSONValidator");
+const log = require("lib/log");
+const errorHandler = require("lib/errorHandler");
+const rest = require("lib/rest");
+const queue = require("lib/Queue");
 
 
 const app = express();
