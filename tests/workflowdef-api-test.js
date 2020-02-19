@@ -1,9 +1,9 @@
 const chakram = require('chakram');
 const workflowDef = require('./data/workflowdefs/fulfilorder.json');
+const url = require("./config").workflowService.url
 
 expect = chakram.expect;
 
-const url = 'http://localhost:3000'
 
 describe("Workflow def API", function () {
     it("should create workflow def", () => {

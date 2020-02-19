@@ -1,8 +1,8 @@
 const path = require("path");
-const JSONValidationError = require("../errors/JSONValidationError")
+const JSONValidationError = require("./errors/JSONValidationError")
 const ajv = new require("ajv")();
 
-class JSONValidator {
+class Schema {
 
     constructor(schemaName, schemaFile) {
         this.schemaName = schemaName;
@@ -22,7 +22,7 @@ class JSONValidator {
     }
 }
 
-class JSONValidationService {
+class JSONValidator {
 
     constructor() {
         this.validators = {};
@@ -37,9 +37,9 @@ class JSONValidationService {
         let validator = this.validators[schemaName];
         if (validator) return validator;
         let schemaFile = path.normalize(__dirname + "/../schemas/" + schemaName + ".schema.json");
-        return this.validators[schemaName] = new JSONValidator(schemaName, schemaFile);
+        return this.validators[schemaName] = new Schema(schemaName, schemaFile);
     }
 
 }
 
-module.exports = new JSONValidationService();
+module.exports = new JSONValidator();

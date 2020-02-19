@@ -4,11 +4,12 @@ const HttpStatus = require('http-status-codes');
 const bodyParser = require("body-parser");
 const asyncHandler = require('express-async-handler')
 
-const workflowDefRepo = require("./repos/WorkflowDefRepo");
-const jsonValidationService = require("./services/JSONValidationService");
-const log = require("./log");
-const errorHandler = require("./errorHandler");
-const rest = require("./rest");
+const workflowDefRepo = require("../lib/repos/WorkflowDefRepo");
+const jsonValidator = require("../lib/JSONValidator");
+const log = require("../lib/log");
+const errorHandler = require("../lib/errorHandler");
+const rest = require("../lib/rest");
+const queue = require("../lib/Queue");
 
 
 const app = express();
@@ -18,7 +19,7 @@ app.use(cors());
 function validateJSONRequest(schemaName) {
     return function(req, res, next) {
        let json = req.body;
-       let result = jsonValidationService.validate(json, schemaName)
+       let result = jsonValidator.validate(json, schemaName)
        if (result.valid) next()
        else next(result.error);
     }
@@ -55,6 +56,13 @@ app.delete("/workflowdefs/:id",
         let id = req.params["id"];
         let result = await workflowDefRepo.delete(id, req.body)
         rest.sendStatus(res, HttpStatus.OK, result);
+    })
+);
+
+app.post("/workflows",
+    asyncHandler(async (req, res) => {
+        queue.publish("actions", "", req.body)
+        rest.sendStatus(res, HttpStatus.CREATED);
     })
 );
 
