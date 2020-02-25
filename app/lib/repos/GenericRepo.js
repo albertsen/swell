@@ -1,4 +1,5 @@
 const db = require("lib/DB");
+const log = require("lib/log");
 const ValidationError = require("lib/errors/ValidationError");
 const ConflictError = require("lib/errors/ConflictError");
 const NotFoundError = require("lib/errors/NotFoundError");
@@ -17,11 +18,11 @@ class GenericRepo {
         if (!doc) throw new ValidationError("No document given");
         if (doc.id) doc._id = doc.id;
         try {
-            await this.collection().insertOne(doc);
-            return { 
-                message: "Document created",
-                id: doc.id 
+            let res = await this.collection().insertOne(doc);
+            if (!doc.id) {
+                doc.id = res.insertedId;
             }
+            return doc;
         }
         catch (error) {
             if (error.code == 11000) throw new ConflictError("There is already a document with the ID: " + doc.id);
@@ -44,13 +45,13 @@ class GenericRepo {
         doc._id = id;
         let res = await this.collection().replaceOne({ _id: id }, doc);
         if (res.matchedCount == 0) throw new NotFoundError("Could not find document with ID: " + id)
-        return { message: "Document updated" } 
+        return doc;
     }
 
     async delete(id) {
         if (!id) throw new ValidationError("No ID given");
-        let res = await this.collection().deleteOne({ _id: id });
-        return { message: "Document deleted" } ;
+        await this.collection().deleteOne({ _id: id });
+        return null;
     }
 
 

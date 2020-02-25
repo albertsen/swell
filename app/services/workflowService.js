@@ -27,7 +27,7 @@ function validateJSONRequest(schemaName) {
 }
 
 app.post("/workflowdefs",
-    validateJSONRequest("workflow_def"),
+    validateJSONRequest("WorkflowDef"),
     asyncHandler(async (req, res) => {
         let result = await workflowDefRepo.create(req.body)
         rest.sendStatus(res, HttpStatus.CREATED, result);
@@ -44,42 +44,43 @@ app.get("/workflowdefs/:id",
 );
 
 app.put("/workflowdefs/:id",
-    validateJSONRequest("workflow_def"),
+    validateJSONRequest("WorkflowDef"),
     asyncHandler(async (req, res) => {
         let id = req.params["id"];
         let result = await workflowDefRepo.update(id, req.body)
-        rest.sendStatus(res, HttpStatus.OK, result);
+        rest.sendStatus(res, HttpStatus.OK, result, result);
     })
 );
 
 app.delete("/workflowdefs/:id",
     asyncHandler(async (req, res) => {
         let id = req.params["id"];
-        let result = await workflowDefRepo.delete(id, req.body)
-        rest.sendStatus(res, HttpStatus.OK, result);
+        await workflowDefRepo.delete(id, req.body)
+        rest.sendStatus(res, HttpStatus.OK);
     })
 );
 
 app.post("/workflows",
+    validateJSONRequest("WorkflowStartRequest"),
     asyncHandler(async (req, res) => {
         messaging.publish("actions", req.body)
-        rest.sendStatus(res, HttpStatus.CREATED);
+        rest.sendStatus(res, HttpStatus.CREATED, req.body);
     })
 );
 
+app.use(errorHandler);
+
 async function init() {
-    app.use(errorHandler);
     await db.connect();
     await messaging.connect();
 }
 
 init()
     .then(() => {
-        app.listen(3000, () => log.info("Server listening on port 3000!"));
+        app.listen(3000, () => log.info("Workflow service listening on port 3000!"));
     })
     .catch((error) => {
         log.error("Cannot start server");
         log.error(error);
         process.exit(1);
     });
-

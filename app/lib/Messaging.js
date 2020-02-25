@@ -35,9 +35,17 @@ class Messaging {
         if (!exConfig) throw new Error("Invalid exchange: " + exchange);
         if (!exConfig.queues[queue]) throw new Error("Invalid queue: " + queue);
         this.channel.consume(queue, (msg) => {
-            let json = msg.content.toString("utf8");
-            let payload = JSON.parse(json);
-            callback(payload);
+            try {
+                let json = msg.content.toString("utf8");
+                let payload = JSON.parse(json);   
+                callback(payload);
+            }
+            catch(error) {
+                log.error(error);
+            }
+            finally {
+                this.channel.ack(msg);
+            }
         });
     }
 
