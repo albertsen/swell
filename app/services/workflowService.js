@@ -9,7 +9,8 @@ const jsonValidator = require("lib/JSONValidator");
 const log = require("lib/log");
 const errorHandler = require("lib/errorHandler");
 const rest = require("lib/rest");
-const queue = require("lib/Queue");
+const messaging = require("lib/Messaging");
+const db = require("lib/DB");
 
 
 const app = express();
@@ -17,11 +18,11 @@ app.use(bodyParser.json())
 app.use(cors());
 
 function validateJSONRequest(schemaName) {
-    return function(req, res, next) {
-       let json = req.body;
-       let result = jsonValidator.validate(json, schemaName)
-       if (result.valid) next()
-       else next(result.error);
+    return function (req, res, next) {
+        let json = req.body;
+        let result = jsonValidator.validate(json, schemaName)
+        if (result.valid) next()
+        else next(result.error);
     }
 }
 
@@ -61,13 +62,24 @@ app.delete("/workflowdefs/:id",
 
 app.post("/workflows",
     asyncHandler(async (req, res) => {
-        queue.publish("actions", "", req.body)
+        messaging.publish("actions", req.body)
         rest.sendStatus(res, HttpStatus.CREATED);
     })
 );
 
+async function init() {
+    app.use(errorHandler);
+    await db.connect();
+    await messaging.connect();
+}
 
+init()
+    .then(() => {
+        app.listen(3000, () => log.info("Server listening on port 3000!"));
+    })
+    .catch((error) => {
+        log.error("Cannot start server");
+        log.error(error);
+        process.exit(1);
+    });
 
-app.use(errorHandler);
-
-app.listen(3000, () => log.info("Server listening on port 3000!"));

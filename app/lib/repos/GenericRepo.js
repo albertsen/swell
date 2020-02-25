@@ -1,5 +1,4 @@
-const db = require("lib/db")
-const log = require("lib/log");
+const db = require("lib/DB");
 const ValidationError = require("lib/errors/ValidationError");
 const ConflictError = require("lib/errors/ConflictError");
 const NotFoundError = require("lib/errors/NotFoundError");
@@ -11,7 +10,7 @@ class GenericRepo {
     }
 
     collection() {
-        return db().collection(this.collectionName);
+        return db.connection.collection(this.collectionName);
     }
 
     async create(doc) {
@@ -51,7 +50,6 @@ class GenericRepo {
     async delete(id) {
         if (!id) throw new ValidationError("No ID given");
         let res = await this.collection().deleteOne({ _id: id });
-        log.debug(JSON.stringify(res));
         return { message: "Document deleted" } ;
     }
 

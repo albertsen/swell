@@ -3,13 +3,19 @@ module.exports = {
         url: "mongodb://localhost:27017",
         dbName: "swell"
     },
-    queue: {
+    messaging: {
         url: "amqp://localhost",
         exchanges: {
             actions: {
-                name: "actions",
                 type: "fanout",
-                options: { durable: true }
+                options: { durable: true },
+                queues: {
+                    actionHandlers: {
+                        options: {
+                            durable: true
+                        }
+                    }
+                }
             }
         }
     }

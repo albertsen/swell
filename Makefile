@@ -6,6 +6,9 @@ export NODE_PATH=$(APP_DIR)
 runworkflowservice:
 	node app/services/workflowService.js
 
+runactiondispatcher:
+	node app/workers/actions/actionDispatcher.js
+
 cleardb:
 	mongo $(DBNMAME) --eval "db.workflowDefs.drop()"
 
