@@ -9,10 +9,11 @@ defmodule Swell.Application do
   defp children() do
     [
       # Swell.Queue.Manager,
-      worker(Mongo, [[name: :swell, database: "swell", pool_size: 2]]),
+      worker(Mongo, [Application.get_env(:swell, :db)]),
       # Swell.Event.WorkerSupervisor,
       # Swell.Event.EventService,
-      Swell.WorkflowEngine.WorkflowService.Endpoint
+      Swell.JSON.Validator,
+      {Plug.Cowboy, scheme: :http, plug: Swell.Services.WorkflowService, options: [port: 8080]}
     ]
   end
 

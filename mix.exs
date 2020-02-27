@@ -14,7 +14,7 @@ defmodule Swell.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:sasl, :logger],
+      extra_applications: [:lager, :sasl, :logger],
       mod: {Swell.Application, []}
     ]
   end
@@ -29,7 +29,9 @@ defmodule Swell.MixProject do
       {:plug, "~> 1.9"},
       {:cowboy, "~> 2.7"},
       {:plug_cowboy, "~> 2.1"},
-      {:jason, "~> 1.1"}
+      {:jason, "~> 1.1"},
+      {:httpoison, "~> 1.6"},
+      {:ex_json_schema, "~> 0.7.3"}
     ]
   end
 end
