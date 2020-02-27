@@ -1,5 +1,5 @@
 defmodule Swell.Services.WorkflowEndpoint do
-  alias Swell.DB.Repo.WorkflowDefRepo
+  alias Swell.DB.WorkflowDefRepo
   import Swell.Endpoints.Helper
   require Logger
   use Plug.Router
