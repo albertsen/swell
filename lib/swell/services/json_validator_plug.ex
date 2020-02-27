@@ -1,13 +1,14 @@
 defmodule Swell.Services.JSONValidatorPlug do
   import Swell.Services.ServiceHelpers
 
-  def init(schema) do
-    schema
+  def init({path, schema} = opts) when is_binary(path) and is_atom(schema) do
+    opts
   end
 
-  def call(conn, schema) do
-    if conn.method in ~w(POST PUT) do
+  def call(conn, {path, schema}) do
+    if String.starts_with?(conn.request_path, path) and conn.method in ~w(POST PUT) do
       res = Swell.JSON.Validator.validate(conn.body_params, schema)
+
       case res do
         {:error, errors} ->
           body = %{
@@ -15,6 +16,7 @@ defmodule Swell.Services.JSONValidatorPlug do
           }
 
           send_json_response({:unprocessable_entity, body}, conn)
+
         _ ->
           %{conn | body_params: Swell.Map.Helpers.atomize_keys(conn.body_params)}
       end
@@ -22,5 +24,4 @@ defmodule Swell.Services.JSONValidatorPlug do
       conn
     end
   end
-
 end
