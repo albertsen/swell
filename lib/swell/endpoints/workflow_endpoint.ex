@@ -1,6 +1,6 @@
-defmodule Swell.Services.WorkflowService do
+defmodule Swell.Services.WorkflowEndpoint do
   alias Swell.DB.Repo.WorkflowDefRepo
-  import Swell.Services.ServiceHelpers
+  import Swell.Endpoints.Helper
   require Logger
   use Plug.Router
   use Plug.ErrorHandler
@@ -11,7 +11,7 @@ defmodule Swell.Services.WorkflowService do
     json_decoder: Jason
   )
 
-  plug(Swell.Services.JSONValidatorPlug, {"/workflowdefs", :workflow_def})
+  plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflowdefs", :workflow_def})
   plug(:match)
   plug(:dispatch)
 

@@ -1,5 +1,5 @@
-defmodule Swell.Services.JSONValidatorPlug do
-  import Swell.Services.ServiceHelpers
+defmodule Swell.Endpoints.Plugs.JSONValidator do
+  import Swell.Endpoints.Helper
 
   def init({path, schema} = opts) when is_binary(path) and is_atom(schema) do
     opts

@@ -1,4 +1,4 @@
-defmodule Swell.Services.ServiceHelpers do
+defmodule Swell.Endpoints.Helper do
   require Logger
   import Plug.Conn
   alias Plug.Conn.Status
