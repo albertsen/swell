@@ -1,39 +1,40 @@
 defmodule Swell.DB.Repo.WorkflowDefRepo do
   require Logger
-  @db :swell
+  @db Keyword.get(Application.get_env(:swell, :db), :name)
   @collection "workflow_defs"
 
-  def create(%{id: id} = workflow_def) when is_binary(id) do
-    workflow_def = Map.put(workflow_def, :_id, id)
+  def create(workflow_def) when is_map(workflow_def) do
+    workflow_def = Map.put_new(workflow_def, :_id, workflow_def[:id])
     res = Mongo.insert_one(@db, @collection, workflow_def)
 
     case res do
-      {:ok, _} ->
-        {:created, "Document created with ID: #{id}"}
+      {:ok, %Mongo.InsertOneResult{inserted_id: inserted_id}} ->
+        workflow_def =
+          workflow_def
+          |> Map.delete(:_id)
+          |> Map.put(:id, inserted_id)
+
+        {:created, workflow_def}
 
       {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000}]}} ->
-        {:conflict, "Conflict - Document already exists with ID: #{id}"}
+        {:conflict, %{message: "A document already exists with ID: #{workflow_def.id}"}}
 
       {:error, error} ->
         Logger.error("Error creating document: #{inspect(error)}")
-        {:error, "An error occurred"}
+        {:internal_server_errror, %{message: "An error occurred"}}
     end
   end
 
   def find_by_id(id) when is_binary(id) do
     workflow_def = Mongo.find_one(@db, @collection, %{_id: id})
 
-    case workflow_def do
-      nil ->
-        {:not_found, "No document found with ID: #{id}"}
-
-      _ ->
-        workflow_def =
-          workflow_def
-          |> Map.delete("_id")
-          |> Swell.Map.Helpers.atomize_keys()
-
-        {:ok, workflow_def}
+    if workflow_def do
+      {:ok,
+       workflow_def
+       |> Map.delete("_id")
+       |> Swell.Map.Helpers.atomize_keys()}
+    else
+      {:not_found, %{message: "No document found with ID: #{id}"}}
     end
   end
 
@@ -47,19 +48,27 @@ defmodule Swell.DB.Repo.WorkflowDefRepo do
 
     case res do
       {:ok, %Mongo.UpdateResult{matched_count: 0}} ->
-        {:not_found, "No document found with ID: #{id}"}
+        {:not_found, %{message: "No document found with ID: #{id}"}}
 
       {:ok, _} ->
-        {:ok, "Document updated"}
+        {:ok, doc}
 
       {:error, error} ->
-        Logger.error("Error creating WorkflowDef: #{inspect(error)}")
-        {:error, "An error occurred"}
+        Logger.error("Error updating WorkflowDef: #{inspect(error)}")
+        {:internal_server_errror, %{message: "An error occurred"}}
     end
   end
 
   def delete(id) when is_binary(id) do
-    Mongo.delete_one!(@db, @collection, %{_id: id})
-    {:ok, "Document deleted"}
+    res = Mongo.delete_one(@db, @collection, %{_id: id})
+
+    case res do
+      {:ok, _} ->
+        {:ok, nil}
+
+      {:error, error} ->
+        Logger.error("Error deleting WorkflowDef: #{inspect(error)}")
+        {:internal_server_errror, %{message: "An error occurred"}}
+    end
   end
 end

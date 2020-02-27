@@ -53,6 +53,4 @@ defmodule Swell.Services.WorkflowService do
 
     send_json_response({:error, "An error occurred"}, conn)
   end
-
-
 end

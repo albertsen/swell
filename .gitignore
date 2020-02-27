@@ -27,3 +27,4 @@ swell-*.tar
 /playground/
 *.log
 /data/
+.DS_Store
