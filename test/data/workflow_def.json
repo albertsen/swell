@@ -1,5 +1,5 @@
 {
-    "id": "fulfilorder1",
+    "id": "fulfilorder",
     "description": "Example order fulfilment process",
     "actionHandlers": {
         "start": {

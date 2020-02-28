@@ -1,5 +1,5 @@
 defmodule Swell.Services.WorkflowEndpoint do
-  alias Swell.DB.WorkflowDefRepo
+  alias Swell.Services.WorkflowDefService
   import Swell.Endpoints.Helper
   require Logger
   use Plug.Router
@@ -16,7 +16,7 @@ defmodule Swell.Services.WorkflowEndpoint do
   plug(:dispatch)
 
   get "/workflowdefs/:id" do
-    WorkflowDefRepo.find_by_id(id)
+    WorkflowDefService.get_for_id(id)
     |> send_json_response(conn)
   end
 

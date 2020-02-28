@@ -1,4 +1,4 @@
-defmodule Swell.DB.GenRepo do
+defmodule Swell.Repos.GenRepo do
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
       use GenServer
