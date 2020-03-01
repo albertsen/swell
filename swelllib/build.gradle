@@ -1,0 +1,13 @@
+plugins {
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+sourceCompatibility = '13'
+group = 'com.sap.cx.swell'
+
+
+dependencies {
+	implementation 'org.springframework.data:spring-data-mongodb:2.2.5.RELEASE'
+	implementation 'org.springframework:spring-webflux:5.2.4.RELEASE'
+}

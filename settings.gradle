@@ -1,1 +1,3 @@
 rootProject.name = 'swell'
+include 'swelllib'
+include 'workflowdefservice'
