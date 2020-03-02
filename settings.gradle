@@ -1,1 +1,3 @@
 rootProject.name = 'swell'
+include 'workflowdefservice'
+include 'foundation'

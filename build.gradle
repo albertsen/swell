@@ -1,48 +1,10 @@
-plugins {
-	id 'org.springframework.boot' version '2.2.5.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-	id 'java'
-	id 'com.adarshr.test-logger' version '2.0.0'
+allprojects {
+    repositories {
+        jcenter()
+    }
+
 }
-
-group = 'com.sap.cx.swell'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '13'
-
-apply plugin: 'com.adarshr.test-logger'
-
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'
-	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
-	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation 'org.junit.jupiter:junit-jupiter'
-	testCompile "com.intuit.karate:karate-junit5:0.9.5"
-	testCompile "com.intuit.karate:karate-apache:0.9.5"
-	testCompile "net.masterthought:cucumber-reporting:5.1.1"
-}
-
-sourceSets {
-	test {
-		resources {
-			srcDir file('src/test/java')
-			include '**/*.java'
-			include '**/*.feature'
-			include '**/*.json'
-		}
-	}
-}
-
-test {
-	systemProperty "karate.options", System.properties.getProperty("karate.options")
-	systemProperty "karate.env", System.properties.getProperty("karate.env")
-	outputs.upToDateWhen { false }
-	useJUnitPlatform()
+subprojects {
+    group = 'com.sap.cx.swell'
+    version = '0.1'
 }
