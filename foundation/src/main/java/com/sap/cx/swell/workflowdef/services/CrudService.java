@@ -1,4 +1,4 @@
-package com.sap.cx.swell.services;
+package com.sap.cx.swell.workflowdef.services;
 
 import reactor.core.publisher.Mono;
 

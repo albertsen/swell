@@ -1,6 +1,6 @@
-package com.sap.cx.swell.api.handlers;
+package com.sap.cx.swell.workflowdef.api.handlers;
 
-import com.sap.cx.swell.services.CrudService;
+import com.sap.cx.swell.workflowdef.services.CrudService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;

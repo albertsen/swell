@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SwellApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SwellApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SwellApplication.class, args);
+    }
 
 }

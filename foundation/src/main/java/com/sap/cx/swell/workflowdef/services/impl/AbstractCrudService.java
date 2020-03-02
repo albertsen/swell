@@ -1,4 +1,4 @@
-package com.sap.cx.swell.services.impl;
+package com.sap.cx.swell.workflowdef.services.impl;
 
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;

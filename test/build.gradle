@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'com.adarshr.test-logger' version '2.0.0'
+}
+
+sourceCompatibility = '13'
+
+apply plugin: 'com.adarshr.test-logger'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testImplementation "com.intuit.karate:karate-junit5:0.9.5"
+    testImplementation "com.intuit.karate:karate-apache:0.9.5"
+    testImplementation "net.masterthought:cucumber-reporting:5.1.1"
+}
+
+test {
+    useJUnitPlatform()
+}

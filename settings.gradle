@@ -1,3 +1,4 @@
-rootProject.name = 'swell'
-include 'workflowdefservice'
-include 'foundation'
+rootProject.name = "swell"
+include "workflowdefservice"
+include "foundation"
+include "test"

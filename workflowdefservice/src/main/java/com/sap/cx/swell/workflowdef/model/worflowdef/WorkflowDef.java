@@ -1,5 +1,6 @@
-package com.sap.cx.swell.workflowdef.model.worflowdef;
+package com.sap.cx.swell.workflowdef.workflowdef.model.worflowdef;
 
+import com.sap.cx.swell.workflowdef.model.worflowdef.ActionHandlerDef;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
