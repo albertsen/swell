@@ -8,3 +8,8 @@ subprojects {
     group = 'com.sap.cx.swell'
     version = '0.1'
 }
+
+task dockerRun(type: Exec) {
+    dependsOn "workflowdefservice:dockerBuild"
+    commandLine "docker-compose", "up", "--remove-orphans"
+}
