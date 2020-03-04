@@ -1,0 +1,2 @@
+CREATE USER lwadmin;
+GRANT ALL PRIVILEGES ON DATABASE swell TO lwadmin;

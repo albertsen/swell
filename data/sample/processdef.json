@@ -1,0 +1,69 @@
+{
+    "id": "fulfilorder",
+    "type": "processdefs",
+    "content": {
+        "description": "Example order fulfilment process",
+        "workflow": {
+            "actions": {
+                "checkOrder": {
+                    "url": "http://actionhandler/handle?orderStatus=CHECKED&return=OK"
+                },
+                "capturePayment": {
+                    "url": "http://actionhandler/handle?orderStatus=PAYMENT_CAPTURED&return=OK"
+                },
+                "prepareShipment": {
+                    "url": "http://actionhandler/handle?orderStatus=PREPARING_SHIPMENT&return=OK"
+                },
+                "shipped": {
+                    "url": "http://actionhandler/handle?orderStatus=SHIPPED&return=OK"
+                },
+                "error": {
+                    "url": "http://actionhandler/handle?orderStatus=ERROR"
+                },
+                "done": {
+                    "url": "http://actionhandler/handle?orderStatus=COMPLETED&return=OK"
+                }
+            },
+            "steps": {
+                "start": {
+                    "action": "checkOrder",
+                    "transitions": {
+                        "OK": "capturePayment",
+                        "ERROR": "error"
+                    }
+                },
+                "capturePayment": {
+                    "action": "capturePayment",
+                    "transitions": {
+                        "OK": "splitOrder",
+                        "ERROR": "error"
+                    }
+                },
+                "shipOrder": {
+                    "action": "shipOrder",
+                    "transitions": {
+                        "ORDER_SPLIT": "waitForShipment",
+                        "ERROR": "error"
+                    }
+                },
+                "waitForShipment": {
+                    "waitFor": "shipped",
+                    "next": "shipped"
+                },
+                "shipped": {
+                    "action": "shipped",
+                    "transitions": {
+                        "OK": "done",
+                        "ERROR": "error"
+                    }
+                },
+                "error": {
+                    "action": "error"
+                },
+                "done": {
+                    "action": "done"
+                }
+            }
+        }
+    }
+}
