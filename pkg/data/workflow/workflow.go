@@ -1,9 +1,9 @@
 package workflow
 
 type Workflow struct {
-	InternalID    string                 `json:"id" bson:"_id,omitempty"`
-	WorkflowDefID string                 `json:"workflowDefId,omitempty"`
-	Document      map[string]interface{} `json:"document,omitempty"`
+	InternalID    string      `json:"id" bson:"_id,omitempty"`
+	WorkflowDefID string      `json:"workflowDefId,omitempty"`
+	Document      interface{} `json:"document,omitempty"`
 }
 
 func (w *Workflow) ID() string {

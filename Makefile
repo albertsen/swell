@@ -39,12 +39,13 @@ cleanqueues:
 
 cleandata: cleandb cleanqueues
 
-test: cleandata test-workflowdefservice test-workflowservice
+test: test-workflowdefservice test-workflowservice
 
-test-workflowdefservice:
+test-workflowdefservice: cleandb
 	$(GOTEST) $(PKGPATH)/cmd/services/workflowdefservice
 
-test-workflowservice:
+test-workflowservice: cleandb
+	curl --header "Content-Type: application/json" -d @./test/data/workflowdef.json http://localhost:8080/workflowdefs
 	$(GOTEST) $(PKGPATH)/cmd/services/workflowservice
 
 clean: 

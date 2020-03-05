@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	wf "github.com/albertsen/swell/pkg/data/workflow"
 	"github.com/albertsen/swell/pkg/db"
+	"github.com/albertsen/swell/pkg/rest/client"
 	"github.com/albertsen/swell/pkg/rest/server"
 	"github.com/albertsen/swell/pkg/utils"
 	"github.com/labstack/echo"
@@ -22,11 +24,25 @@ func StartWorkflow(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 	}
 	if workflow.ID() != "" {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, "Document can't have an ID. It will be assigned by the system.")
+		return echo.NewHTTPError(http.StatusUnprocessableEntity,
+			"Document can't have an ID. It will be assigned by the system.")
 	}
-	_, err := repo.Create(&workflow)
+	if workflow.WorkflowDefID == "" {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity,
+			"Document doesn't have a workflowDefId.")
+	}
+	res, err := client.Head(fmt.Sprintf("%s/workflowdefs/%s",
+		workflowDefServiceURL, workflow.WorkflowDefID))
 	if err != nil {
-		return err
+		return fmt.Errorf("Error checking for workflow def: %s", err)
+	}
+	if res.StatusCode != http.StatusOK {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity,
+			fmt.Sprintf("Can't find workflow def with ID: %s", workflow.WorkflowDefID))
+	}
+	_, err = repo.Create(&workflow)
+	if err != nil {
+		return fmt.Errorf("Error creating workflow: %s", err)
 	}
 	return c.JSON(http.StatusCreated, workflow)
 }

@@ -40,4 +40,15 @@ func TestCRUD(t *testing.T) {
 	}
 	assert.Equal(t, http.StatusOK, res.StatusCode, fmt.Sprintf("HTTP status should be OK - %s", res))
 	assert.EqualValues(t, &refWorkflow, &storedWorkflow, "Reference order and stored order are not equal")
+
+	invalidWorkflow := &wf.Workflow{
+		WorkflowDefID: "invalid",
+		Document:      map[string]bool{"valid": false},
+	}
+	res, err = client.Post(workflowServiceURL, invalidWorkflow, &createdWorkflow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode, res.Message)
+
 }
