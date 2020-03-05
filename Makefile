@@ -20,14 +20,13 @@ PSQL=psql -h localhost -p $(PSQL_PORT)
 DB_NAME=swell
 
 
-build: workflowdefservice
+build: workflowdefservice workflowservice
 
 workflowdefservice:
 	$(GOBUILD) -o $(BUILD_DIR)/workflowdefservice -v $(PKGPATH)/cmd/services/workflowdefservice
-processservice:
-	$(GOBUILD) -o $(BUILD_DIR)/processservice -v $(PKGPATH)/cmd/processservice
-processengine:
-	$(GOBUILD) -o $(BUILD_DIR)/processengine -v $(PKGPATH)/cmd/processengine
+workflowservice:
+	$(GOBUILD) -o $(BUILD_DIR)/workflowservice -v $(PKGPATH)/cmd/services/workflowservice
+
 
 
 load-sample-data:
@@ -35,7 +34,8 @@ load-sample-data:
 	curl --header "Content-Type: application/json" -v -d @./data/sample/processdef.json http://localhost:5984/processdefs
 
 cleardb:
-	mongo swell --quiet --eval "db.workflow_defs.deleteMany({})" 
+	mongo swell --quiet --eval "db.workflowDefs.deleteMany({})" 
+	mongo swell --quiet --eval "db.workflows.deleteMany({})" 
 
 clearqueues:
 	rabbitmqadmin -f tsv -q list queues name | xargs -I qn rabbitmqadmin delete queue name=qn
@@ -46,6 +46,10 @@ test: cleardb test-workflowdefservice # test-processservice
 
 test-workflowdefservice:
 	$(GOTEST) $(PKGPATH)/cmd/services/workflowdefservice
+
+test-workflowservice:
+	$(GOTEST) $(PKGPATH)/cmd/services/workflowservice
+
 
 test-processservice: load-sample-data
 	$(GOTEST) $(PKGPATH)/cmd/processservice
@@ -78,4 +82,5 @@ setup:
 	go get -u go.mongodb.org/mongo-driver/mongo \
 		github.com/labstack/echo/... \
 		github.com/streadway/amqp \
+		github.com/google/uuid \
 		github.com/stretchr/testify

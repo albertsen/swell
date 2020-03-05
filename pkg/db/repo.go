@@ -2,12 +2,16 @@ package db
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"net/http"
+	"reflect"
 
+	"github.com/albertsen/swell/pkg/data"
+	"github.com/albertsen/swell/pkg/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -17,8 +21,13 @@ type Repo struct {
 	collection *mongo.Collection
 }
 
-func NewRepo(uri string, dbName string, collection string) (*Repo, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
+func NewRepo(collection string) (*Repo, error) {
+	uri := utils.Getenv("DB_URI", "mongodb://localhost:27017")
+	dbName := utils.Getenv("DB_NAME", "swell")
+	tM := reflect.TypeOf(bson.M{})
+	reg := bson.NewRegistryBuilder().RegisterTypeMapEntry(bsontype.EmbeddedDocument, tM).Build()
+	clientOpts := options.Client().SetRegistry(reg).ApplyURI(uri)
+	client, err := mongo.NewClient(clientOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +41,12 @@ func NewRepo(uri string, dbName string, collection string) (*Repo, error) {
 	}, nil
 }
 
-func (r *Repo) Create(doc interface{}) (string, error) {
-	res, err := r.collection.InsertOne(context.Background(), doc)
+func (r *Repo) Create(doc data.Indentifiable) (string, error) {
+	if doc.ID() == "" {
+		uuid := uuid.New()
+		doc.SetID(uuid.String())
+	}
+	_, err := r.collection.InsertOne(context.Background(), doc)
 	if err != nil {
 		writeException, ok := err.(mongo.WriteException)
 		if ok {
@@ -45,29 +58,25 @@ func (r *Repo) Create(doc interface{}) (string, error) {
 		}
 		return "", err
 	}
-	switch v := res.InsertedID.(type) {
-	case primitive.ObjectID:
-		return v.Hex(), nil
-	case string:
-		return v, nil
-	default:
-		return "", errors.New("Unknown type of inserted ID")
-	}
+	return doc.ID(), nil
 }
 
-func (r *Repo) Update(id string, doc interface{}, updatedDoc interface{}) error {
+func (r *Repo) Update(id string, doc data.Indentifiable, updatedDoc data.Indentifiable) error {
+	if id != doc.ID() {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, fmt.Sprintf("Id in URL [%s] and document [%s] don't match", id, doc.ID()))
+	}
 	res := r.collection.FindOneAndReplace(context.Background(), bson.M{"_id": id}, doc)
 	if err := res.Err(); err != nil {
 		return err
 	}
-	err := res.Decode(&updatedDoc)
+	err := res.Decode(updatedDoc)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *Repo) Get(id string, doc interface{}) error {
+func (r *Repo) Get(id string, doc data.Indentifiable) error {
 	res := r.collection.FindOne(context.Background(), bson.M{"_id": id})
 	if res.Err() == mongo.ErrNoDocuments {
 		return echo.NewHTTPError(http.StatusNotFound, "Document not found")

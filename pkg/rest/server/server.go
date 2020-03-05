@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/albertsen/swell/pkg/utils"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 type errorMessage struct {
@@ -33,4 +37,14 @@ func SendResponseOrError(w http.ResponseWriter, expectedStatusCode int, actualSt
 	} else {
 		SendResponse(w, expectedStatusCode, data)
 	}
+}
+
+func Start(config func(*echo.Echo)) {
+	e := echo.New()
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "${time_rfc3339} ${method} ${uri} ${status} ${error}\n",
+	}))
+	config(e)
+	listenAddr := utils.Getenv("LISTEN_ADDR", ":8080")
+	e.Logger.Fatal(e.Start(listenAddr))
 }
