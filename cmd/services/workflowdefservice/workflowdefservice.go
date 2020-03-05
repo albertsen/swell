@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -54,6 +55,19 @@ func GetWorkflowDef(c echo.Context) error {
 	return c.JSON(http.StatusOK, workflowDef)
 }
 
+func FindWorkflowDef(c echo.Context) error {
+	id := c.Param("id")
+	exists, err := repo.Exists(id)
+	if err != nil {
+		return fmt.Errorf("Error checking if document exists: %w", err)
+	}
+	if exists {
+		return c.NoContent(http.StatusOK)
+	} else {
+		return c.NoContent(http.StatusNotFound)
+	}
+}
+
 func DeleteWorkflowDef(c echo.Context) error {
 	id := c.Param("id")
 	err := repo.Delete(id)
@@ -73,6 +87,7 @@ func main() {
 	server.Start(func(e *echo.Echo) {
 		e.POST("/workflowdefs", CreateWorkflowDef)
 		e.GET("/workflowdefs/:id", GetWorkflowDef)
+		e.HEAD("/workflowdefs/:id", FindWorkflowDef)
 		e.PUT("/workflowdefs/:id", UpdateWorkflowDef)
 		e.DELETE("/workflowdefs/:id", DeleteWorkflowDef)
 	})

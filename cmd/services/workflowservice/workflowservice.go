@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	repo *db.Repo
+	repo                  *db.Repo
+	workflowDefServiceURL = utils.Getenv("WORKFLOW_DEF_SERRVICE_URL", "http://workflowdefservice:8080")
 )
 
 func StartWorkflow(c echo.Context) error {

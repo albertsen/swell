@@ -62,15 +62,18 @@ docker: build-linux
 	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowdefservice:latest -f infra/docker/services/workflowdefservice/Dockerfile .
 	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowservice:latest -f infra/docker/services/workflowservice/Dockerfile .
 
-docker-start: docker
+dockerup:
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) up --remove-orphans
 
-docker-stop:
+dockerdown:
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) down
 
-restart-services: docker
-	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) stop documentservice && \
-		$(DOCKER_COMPOSE) up --no-deps -d documentservice
+dockerrestart: docker
+	cd $(DOCKER_DIR) && \
+		$(DOCKER_COMPOSE) stop workflowdefservice && \
+		$(DOCKER_COMPOSE) stop workflowservice && \
+		$(DOCKER_COMPOSE) up --no-deps -d workflowdefservice && \
+		$(DOCKER_COMPOSE) up --no-deps -d workflowservice
 
 setup:
 	go get -u go.mongodb.org/mongo-driver/mongo \
