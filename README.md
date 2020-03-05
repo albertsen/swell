@@ -1,3 +1,3 @@
-# Less Workflow
+# Swell
 
-A cloud process engine
+A background workflow engine
