@@ -28,31 +28,24 @@ workflowservice:
 	$(GOBUILD) -o $(BUILD_DIR)/workflowservice -v $(PKGPATH)/cmd/services/workflowservice
 
 
-
-load-sample-data:
-	curl --header "Content-Type: application/json" -v -d @./data/sample/order.json http://localhost:5984/orders
-	curl --header "Content-Type: application/json" -v -d @./data/sample/processdef.json http://localhost:5984/processdefs
-
-cleardb:
+cleandb:
 	mongo swell --quiet --eval "db.workflowDefs.deleteMany({})" 
 	mongo swell --quiet --eval "db.workflows.deleteMany({})" 
 
-clearqueues:
+cleanqueues:
 	rabbitmqadmin -f tsv -q list queues name | xargs -I qn rabbitmqadmin delete queue name=qn
 	rabbitmqadmin -f tsv -q list bindings name | xargs -I qn rabbitmqadmin delete binding name=qn
-	rabbitmqadmin -f tsv -q list exchanges name | grep -v amq | xargs -I qn rabbitmqadmin delete exchange name=	
+	rabbitmqadmin -f tsv -q list exchanges name | grep -v amq | xargs -I qn rabbitmqadmin delete exchange name=qn
 
-test: cleardb test-workflowdefservice # test-processservice
+cleandata: cleandb cleanqueues
+
+test: cleandata test-workflowdefservice test-workflowservice
 
 test-workflowdefservice:
 	$(GOTEST) $(PKGPATH)/cmd/services/workflowdefservice
 
 test-workflowservice:
 	$(GOTEST) $(PKGPATH)/cmd/services/workflowservice
-
-
-test-processservice: load-sample-data
-	$(GOTEST) $(PKGPATH)/cmd/processservice
 
 clean: 
 	rm -rf $(BUILD_DIR)
@@ -66,7 +59,8 @@ build-linux: export BUILD_DIR=build/linux
 build-linux: build
 
 docker: build-linux
-	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/documentservice:latest -f infra/docker/documentservice/Dockerfile .
+	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowdefservice:latest -f infra/docker/services/workflowdefservice/Dockerfile .
+	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowservice:latest -f infra/docker/services/workflowservice/Dockerfile .
 
 docker-start: docker
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) up --remove-orphans

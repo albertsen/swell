@@ -1,43 +1,31 @@
 version: '3'
 services:
-  documentservice:
-    image: gcr.io/sap-se-commerce-arch/documentservice:latest
+  workflowdefservice:
+    image: gcr.io/sap-se-commerce-arch/workflowdefservice:latest
     restart: always
     environment:
-      - DB_URL=mongodb://mongo:27017
-      - LISTEN_ADDR=:80
+      - DB_URI=mongodb://mongo:27017
+      - LISTEN_ADDR=:8080
     ports:
-      - "8000:80"
+      - "8080:8080"
+    links:
+      - mongo
     depends_on: 
       - mongo
-  # processservice:
-  #   image: gcr.io/sap-se-commerce-arch/processservice:latest
-  #   restart: always
-  #   environment:
-  #     - DB_SERVER_ADDR=postgres:5432
-  #     - DOCUMENTSERVICE_URL=http://documentservice
-  #     - MSG_SERVER_URL=amqp://guest:guest@rabbitmq:5672/
-  #     - LISTEN_ADDR=:80
-  #   ports:
-  #     - "8001:80"
-  #   depends_on: 
-  #     - documentservice
-  #     - rabbitmq
-  # processengine:
-  #   image: gcr.io/sap-se-commerce-arch/processengine:latest
-  #   restart: always
-  #   environment:
-  #     - MSG_SERVER_URL=amqp://guest:guest@rabbitmq:5672/
-  #   depends_on: 
-  #     - rabbitmq
-  # rabbitmq:
-  #   image: rabbitmq:latest
-  #   restart: always
-  #   volumes:
-  #     - /private/var/lib/rabbitmq:/var/lib/rabbitmq
-  #   ports:
-  #     - "5673:5673"
-  #     - "15672:15672"      
+  workflowservice:
+    image: gcr.io/sap-se-commerce-arch/workflowservice:latest
+    restart: always
+    environment:
+      - DB_URI=mongodb://mongo:27017
+      - LISTEN_ADDR=:8081
+    ports:
+      - "8081:8081"
+    links:
+      - mongo
+      - workflowdefservice
+    depends_on: 
+      - mongo
+      - workflowdefservice    
   mongo:
     image: mongo:latest
     restart: always

@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	workflowServiceURL = "http://localhost:8080/workflows"
+	workflowServiceURL = "http://localhost:8081/workflows"
 )
 
 func TestCRUD(t *testing.T) {
