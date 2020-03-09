@@ -1,5 +1,20 @@
 version: '3'
 services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - /private/var/lib/mongo:/data/db
+    ports:
+      - "27017:27017"
+  rabbitmq:
+    image: rabbitmq:latest
+    restart: always
+    volumes:
+      - /private/var/lib/rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "5673:5673"
+      - "15672:15672"
   workflowdefservice:
     image: gcr.io/sap-se-commerce-arch/workflowdefservice:latest
     restart: always
@@ -17,19 +32,16 @@ services:
     restart: always
     environment:
       - DB_URI=mongodb://mongo:27017
+      - MESSAGING_URI=amqp://guest:guest@rabbitmq:5672/
       - LISTEN_ADDR=:8081
     ports:
       - "8081:8081"
     links:
       - mongo
       - workflowdefservice
+      - rabbitmq
     depends_on: 
       - mongo
-      - workflowdefservice    
-  mongo:
-    image: mongo:latest
-    restart: always
-    volumes:
-      - /private/var/lib/mongo:/data/db
-    ports:
-      - "27017:27017"
+      - workflowdefservice
+      - rabbitmq
+    

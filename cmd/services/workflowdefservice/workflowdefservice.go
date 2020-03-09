@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	wfd "github.com/albertsen/swell/pkg/data/workflowdef"
+	wfd "github.com/albertsen/swell/pkg/data/documents/workflowdef"
 	"github.com/albertsen/swell/pkg/db"
 	"github.com/albertsen/swell/pkg/rest/server"
 	"github.com/albertsen/swell/pkg/utils"

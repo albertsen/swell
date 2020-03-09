@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	wfd "github.com/albertsen/swell/pkg/data/workflowdef"
+	wfd "github.com/albertsen/swell/pkg/data/documents/workflowdef"
 	"github.com/albertsen/swell/pkg/rest/client"
 	tu "github.com/albertsen/swell/pkg/testing/utils"
 	"github.com/stretchr/testify/assert"

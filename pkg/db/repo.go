@@ -63,7 +63,8 @@ func (r *Repo) Create(doc data.Indentifiable) (string, error) {
 
 func (r *Repo) Update(id string, doc data.Indentifiable, updatedDoc data.Indentifiable) error {
 	if id != doc.ID() {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, fmt.Sprintf("Id in URL [%s] and document [%s] don't match", id, doc.ID()))
+		return echo.NewHTTPError(http.StatusUnprocessableEntity,
+			fmt.Sprintf("Id in URL [%s] and document [%s] don't match", id, doc.ID()))
 	}
 	res := r.collection.FindOneAndReplace(context.Background(), bson.M{"_id": id}, doc)
 	if err := res.Err(); err != nil {

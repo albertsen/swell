@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	wf "github.com/albertsen/swell/pkg/data/workflow"
+	wf "github.com/albertsen/swell/pkg/data/documents/workflow"
 	"github.com/albertsen/swell/pkg/rest/client"
 	tu "github.com/albertsen/swell/pkg/testing/utils"
 	"github.com/stretchr/testify/assert"
@@ -35,9 +35,6 @@ func TestCRUD(t *testing.T) {
 	workflowURL := workflowServiceURL + "/" + refWorkflow.ID()
 	var storedWorkflow wf.Workflow
 	res, err = client.Get(workflowURL, &storedWorkflow)
-	if err != nil {
-		t.Fatal(err)
-	}
 	assert.Equal(t, http.StatusOK, res.StatusCode, fmt.Sprintf("HTTP status should be OK - %s", res))
 	assert.EqualValues(t, &refWorkflow, &storedWorkflow, "Reference order and stored order are not equal")
 
@@ -46,9 +43,6 @@ func TestCRUD(t *testing.T) {
 		Document:      map[string]bool{"valid": false},
 	}
 	res, err = client.Post(workflowServiceURL, invalidWorkflow, &createdWorkflow)
-	if err != nil {
-		t.Fatal(err)
-	}
 	assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode, res.Message)
 
 }
