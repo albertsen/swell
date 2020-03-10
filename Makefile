@@ -1,12 +1,12 @@
 BUILD_DIR=build
 PKGPATH=github.com/albertsen/swell
 
-GOCMD=go
-GOBUILD=$(GOCMD) build
-GOTEST=$(GOCMD) test
-GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test -v -count=1
-GOGET=$(GOCMD) get
+GO=go
+GOBUILD=$(GO) build
+GOTEST=$(GO) test
+GOCLEAN=$(GO) clean
+GOTEST=$(GO) test -v -count=1
+GOGET=$(GO) get
 
 KUBECTL=kubectl
 
@@ -14,10 +14,8 @@ DOCKER=docker
 DOCKER_COMPOSE=docker-compose
 DOCKER_DIR=./infra/docker
 
-PSQL_HOST=localhost
-PSQL_PORT=5432
-PSQL=psql -h localhost -p $(PSQL_PORT)
 DB_NAME=swell
+MONGO=mongo $(DB_NAME)
 
 
 build: workflowdefservice workflowservice actiondispatcher
@@ -30,8 +28,8 @@ actiondispatcher:
 	$(GOBUILD) -o $(BUILD_DIR)/actiondispatcher -v $(PKGPATH)/cmd/workers/actiondispatcher
 
 cleandb:
-	mongo swell --quiet --eval "db.workflowDefs.deleteMany({})" 
-	mongo swell --quiet --eval "db.workflows.deleteMany({})" 
+	$(MONGO) --quiet --eval "db.workflowDefs.deleteMany({})" 
+	$(MONGO) --quiet --eval "db.workflows.deleteMany({})" 
 
 cleanqueues:
 	rabbitmqadmin -f tsv -q list queues name | xargs -I qn rabbitmqadmin delete queue name=qn
@@ -43,7 +41,7 @@ cleandata: cleandb cleanqueues
 test: cleandata dockerrestart test-workflowdefservice test-workflowservice
 
 test-workflowdefservice: cleandb
-	$(GOTEST) $(PKGPATH)/cmd/services/workflowdefservice
+	mocha test/scenarios/workflowdef-api-test.js
 
 test-workflowservice: cleandb
 	curl --header "Content-Type: application/json" -d @./test/data/workflowdef.json http://localhost:8080/workflowdefs
@@ -86,3 +84,4 @@ setup:
 		github.com/streadway/amqp \
 		github.com/google/uuid \
 		github.com/stretchr/testify
+	cd test && npm install

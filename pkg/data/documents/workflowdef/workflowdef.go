@@ -6,7 +6,7 @@ type WorkflowDef struct {
 	InternalID     string                    `json:"id" bson:"_id,omitempty"`
 	ActionHandlers map[string]*ActionHandler `json:"actionHandlers,omitempty"`
 	Steps          map[string]*Step          `json:"steps,omitempty"`
-	Name           string                    `json:"name,omitempty,omitempty"`
+	Name           string                    `json:"name,omitempty"`
 }
 
 func (w *WorkflowDef) ID() string {

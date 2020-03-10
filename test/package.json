@@ -1,0 +1,6 @@
+{
+  "name": "swelltest",
+  "devDependencies": {
+    "chakram": "^1.5.0"
+  }
+}
