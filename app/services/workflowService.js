@@ -11,7 +11,7 @@ const log = require("lib/log");
 const errorHandler = require("lib/errorHandler");
 const rest = require("lib/rest");
 const messaging = require("lib/Messaging");
-const db = require("lib/DB");
+const db = require("lib/db");
 
 
 const app = express();

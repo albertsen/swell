@@ -1,5 +1,5 @@
 const { v4: uuid } = require('uuid');
-const db = require("lib/DB");
+const db = require("lib/db");
 const ValidationError = require("lib/errors/ValidationError");
 const ConflictError = require("lib/errors/ConflictError");
 const NotFoundError = require("lib/errors/NotFoundError");

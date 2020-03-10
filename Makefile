@@ -1,6 +1,11 @@
 DBNMAME=swell
 DIR=$(shell pwd)
 APP_DIR=$(DIR)/app
+
+DOCKER=docker
+DOCKER_COMPOSE=docker-compose
+DOCKER_DIR=$(DIR)/infra/docker
+
 export NODE_PATH=$(APP_DIR)
 
 runworkflowservice:
@@ -20,3 +25,6 @@ clear: cleardb purgequeues
 
 test: cleardb
 	mocha tests/*.js
+
+docker:
+	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowservice:latest -f $(DOCKER_DIR)/services/workflowservice/Dockerfile .
