@@ -1,5 +1,5 @@
 const chakram = require('chakram');
-const workflowDef = require('./data/workflowdefs/fulfilorder.json');
+const workflowDef = require('./data/WorkflowDef.json');
 const url = require("./config").workflowService.url
 
 expect = chakram.expect;

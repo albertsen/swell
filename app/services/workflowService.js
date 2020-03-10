@@ -61,7 +61,7 @@ app.delete("/workflowdefs/:id",
 );
 
 app.post("/workflows",
-    validateJSONRequest("WorkflowStartRequest"),
+    validateJSONRequest("Workflow"),
     asyncHandler(async (req, res) => {
         messaging.publish("actions", req.body)
         rest.sendStatus(res, HttpStatus.CREATED, req.body);
