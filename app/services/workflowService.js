@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const asyncHandler = require('express-async-handler')
 
 const workflowDefRepo = require("lib/repos/WorkflowDefRepo");
+const workflowRepo = require("lib/repos/WorkflowRepo");
 const jsonValidator = require("lib/JSONValidator");
 const log = require("lib/log");
 const errorHandler = require("lib/errorHandler");
@@ -63,10 +64,20 @@ app.delete("/workflowdefs/:id",
 app.post("/workflows",
     validateJSONRequest("Workflow"),
     asyncHandler(async (req, res) => {
-        messaging.publish("actions", req.body)
-        rest.sendStatus(res, HttpStatus.CREATED, req.body);
+        let result = await workflowRepo.create(req.body)
+        messaging.publish("actions", result)
+        rest.sendStatus(res, HttpStatus.CREATED, result);
     })
 );
+
+app.get("/workflows/:id",
+    asyncHandler(async (req, res) => {
+        let id = req.params["id"];
+        let doc = await workflowRepo.findById(id)
+        rest.sendStatus(res, HttpStatus.OK, doc);
+    })
+);
+
 
 app.use(errorHandler);
 
