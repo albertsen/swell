@@ -20,13 +20,14 @@ PSQL=psql -h localhost -p $(PSQL_PORT)
 DB_NAME=swell
 
 
-build: workflowdefservice workflowservice
+build: workflowdefservice workflowservice actiondispatcher
 
 workflowdefservice:
 	$(GOBUILD) -o $(BUILD_DIR)/workflowdefservice -v $(PKGPATH)/cmd/services/workflowdefservice
 workflowservice:
 	$(GOBUILD) -o $(BUILD_DIR)/workflowservice -v $(PKGPATH)/cmd/services/workflowservice
-
+actiondispatcher:
+	$(GOBUILD) -o $(BUILD_DIR)/actiondispatcher -v $(PKGPATH)/cmd/workers/actiondispatcher
 
 cleandb:
 	mongo swell --quiet --eval "db.workflowDefs.deleteMany({})" 
@@ -39,7 +40,7 @@ cleanqueues:
 
 cleandata: cleandb cleanqueues
 
-test: test-workflowdefservice test-workflowservice
+test: cleandata dockerrestart test-workflowdefservice test-workflowservice
 
 test-workflowdefservice: cleandb
 	$(GOTEST) $(PKGPATH)/cmd/services/workflowdefservice
@@ -62,8 +63,9 @@ build-linux: build
 docker: build-linux
 	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowdefservice:latest -f infra/docker/services/workflowdefservice/Dockerfile .
 	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowservice:latest -f infra/docker/services/workflowservice/Dockerfile .
+	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/actiondispatcher:latest -f infra/docker/workers/actiondispatcher/Dockerfile .
 
-dockerup:
+dockerup: docker
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) up --remove-orphans
 
 dockerdown:
@@ -73,8 +75,10 @@ dockerrestart: docker
 	cd $(DOCKER_DIR) && \
 		$(DOCKER_COMPOSE) stop workflowdefservice && \
 		$(DOCKER_COMPOSE) stop workflowservice && \
+		$(DOCKER_COMPOSE) stop actiondispatcher && \
 		$(DOCKER_COMPOSE) up --no-deps -d workflowdefservice && \
-		$(DOCKER_COMPOSE) up --no-deps -d workflowservice
+		$(DOCKER_COMPOSE) up --no-deps -d workflowservice && \
+		$(DOCKER_COMPOSE) up --no-deps -d actiondispatcher
 
 setup:
 	go get -u go.mongodb.org/mongo-driver/mongo \

@@ -90,7 +90,6 @@ func main() {
 	defer messaging.Close()
 	publisher, err = messaging.NewPublisher("actions")
 	if err != nil {
-		log.Println(err)
 		log.Fatal(err)
 	}
 	server.Start(func(e *echo.Echo) {

@@ -8,12 +8,12 @@ services:
     ports:
       - "27017:27017"
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:management
     restart: always
     volumes:
       - /private/var/lib/rabbitmq:/var/lib/rabbitmq
     ports:
-      - "5673:5673"
+      - "5672:5672"
       - "15672:15672"
   workflowdefservice:
     image: gcr.io/sap-se-commerce-arch/workflowdefservice:latest
@@ -44,4 +44,13 @@ services:
       - mongo
       - workflowdefservice
       - rabbitmq
-    
+  actiondispatcher:
+    image: gcr.io/sap-se-commerce-arch/actiondispatcher:latest
+    restart: always
+    environment:
+      - MESSAGING_URI=amqp://guest:guest@rabbitmq:5672/
+    links:
+      - rabbitmq
+    depends_on: 
+      - rabbitmq
+        
