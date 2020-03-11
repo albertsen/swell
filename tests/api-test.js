@@ -1,5 +1,6 @@
 const chakram = require('chakram');
 const workflowDef = require('./data/WorkflowDef.json');
+const invalidWorkflowDef = require('./data/WorkflowDef-invalid.json');
 const workflow = require('./data/Workflow.json');
 const url = require("./config").workflowService.url
 
@@ -69,6 +70,18 @@ describe("Workflow def error messages", function () {
                     },
                     "message": "should have required property 'id'"
                 }
+            ]
+        });
+        return chakram.wait();
+    });
+    it("should return a workflow def validation error", () => {
+        let response = chakram.post(url + "/workflowdefs", invalidWorkflowDef);
+        expect(response).to.have.status(422);
+        expect(response).to.comprise.of.json({
+            "messages": [
+                "Worflow definition doesn't have a 'start' step",
+                "No action handler for step: 'nostart'",
+                "Event 'orderValid' triggers invalid step 'invalid'"
             ]
         });
         return chakram.wait();

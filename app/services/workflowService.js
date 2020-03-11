@@ -7,6 +7,7 @@ const asyncHandler = require('express-async-handler')
 const workflowDefRepo = require("lib/repos/WorkflowDefRepo");
 const workflowRepo = require("lib/repos/WorkflowRepo");
 const jsonValidator = require("lib/JSONValidator");
+const workflowDefManager = require("lib/WorkflowDefManager");
 const log = require("lib/log");
 const errorHandler = require("lib/errorHandler");
 const rest = require("lib/rest");
@@ -30,6 +31,12 @@ function validateJSONRequest(schemaName) {
 app.post("/workflowdefs",
     validateJSONRequest("WorkflowDef"),
     asyncHandler(async (req, res) => {
+        let workflowDef = req.body;
+        errors = workflowDefManager.validateWorkflowDef(workflowDef);
+        if (errors.length) {
+            rest.sendMessages(res, HttpStatus.UNPROCESSABLE_ENTITY, errors);
+            return
+        }
         let result = await workflowDefRepo.create(req.body)
         rest.sendBody(res, HttpStatus.CREATED, result);
     })
@@ -44,7 +51,7 @@ app.get("/workflowdefs/:id",
             rest.sendBody(res, HttpStatus.OK, doc);
         }
         else {
-            rest.sendMessage(res, HttpStatus.NOT_FOUND,
+            rest.sendMessages(res, HttpStatus.NOT_FOUND,
                 "No workflow definition found with ID: " + id);
         }
 
@@ -74,11 +81,11 @@ app.post("/workflows",
         let workflow = req.body
         let workflowDef = await workflowDefRepo.findOneById(workflow.workflowDefId)
         if (!workflowDef) {
-            rest.sendMessage(res, HttpStatus.UNPROCESSABLE_ENTITY,
+            rest.sendMessages(res, HttpStatus.UNPROCESSABLE_ENTITY,
                 "Cannot find workflow definition with ID: " + workflow.workflowDefId);
             return
         }
-        let result = await workflowRepo.create(workflow)
+        let result = await workflowRepo.create(workflow);
         messaging.publish("actions", result)
         rest.sendBody(res, HttpStatus.CREATED, result);
     })
@@ -89,7 +96,7 @@ app.get("/workflows/:id",
         let id = req.params["id"];
         let doc = await workflowRepo.findOneById(id);
         if (!doc) {
-            rest.sendMessage(res, HttpStatus.NOT_FOUND,
+            rest.sendMessages(res, HttpStatus.NOT_FOUND,
                 "Cannot find workflow with ID: " + id);
             return
         }

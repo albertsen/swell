@@ -1,3 +1,5 @@
+const log = require("lib/log");
+
 module.exports = {
     sendBody: function(res, status, body) {
         res.status(status);
@@ -9,9 +11,12 @@ module.exports = {
         }
         res.send();
     },
-    sendMessage: function(res, status, message) {
+    sendMessages: function(res, status, messages) {
         res.status(status);
-        res.json({ message: message });
+        if (!Array.isArray(messages)) {
+            messages = [messages]
+        }
+        res.json({ messages: messages });
         res.send();
     }
 }

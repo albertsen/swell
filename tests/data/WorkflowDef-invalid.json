@@ -32,11 +32,11 @@
         }
     },
     "steps": {
-        "start": {
+        "nostart": {
             "started": "checkOrder"
         },
         "checkOrder": {
-            "orderValid": "capturePayment"
+            "orderValid": "invalid"
         },
         "capturePayment": {
             "paymentCaptured": "prepareShipment"
