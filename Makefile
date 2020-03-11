@@ -14,17 +14,29 @@ runworkflowservice:
 runactiondispatcher:
 	node app/workers/actions/actionDispatcher.js
 
-cleardb:
+cleandb:
 	mongo $(DBNMAME) --eval "db.workflowDefs.drop()"
+	mongo $(DBNMAME) --eval "db.workflows.drop()"
 
-clearqueue:
+cleanqueue:
 	rabbitmqadmin -f tsv -q list queues name | xargs -I qn rabbitmqadmin delete queue name=qn
 	rabbitmqadmin -f tsv -q list exchanges name | grep -v amq | xargs -I qn rabbitmqadmin delete exchange name=qn
 
-clear: cleardb purgequeues
+clean: cleandb purgequeues
 
-test: cleardb
+test: cleandb
 	mocha tests/*.js
 
 docker:
 	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowservice:latest -f $(DOCKER_DIR)/services/workflowservice/Dockerfile .
+
+dockerup: docker
+	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) up --remove-orphans
+
+dockerdown:
+	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) down
+
+dockerrestart: docker
+	cd $(DOCKER_DIR) && \
+		$(DOCKER_COMPOSE) stop workflowservice && \
+		$(DOCKER_COMPOSE) up --no-deps -d workflowservice

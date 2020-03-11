@@ -15,42 +15,28 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-  workflowdefservice:
-    image: gcr.io/sap-se-commerce-arch/workflowdefservice:latest
-    restart: always
-    environment:
-      - DB_URI=mongodb://mongo:27017
-      - LISTEN_ADDR=:8080
-    ports:
-      - "8080:8080"
-    links:
-      - mongo
-    depends_on: 
-      - mongo
   workflowservice:
     image: gcr.io/sap-se-commerce-arch/workflowservice:latest
     restart: always
     environment:
       - DB_URI=mongodb://mongo:27017
       - MESSAGING_URI=amqp://guest:guest@rabbitmq:5672/
-      - LISTEN_ADDR=:8081
+      - PORT=3000
     ports:
-      - "8081:8081"
+      - "3000:3000"
     links:
       - mongo
-      - workflowdefservice
       - rabbitmq
     depends_on: 
       - mongo
-      - workflowdefservice
       - rabbitmq
-  actiondispatcher:
-    image: gcr.io/sap-se-commerce-arch/actiondispatcher:latest
-    restart: always
-    environment:
-      - MESSAGING_URI=amqp://guest:guest@rabbitmq:5672/
-    links:
-      - rabbitmq
-    depends_on: 
-      - rabbitmq
+  # actiondispatcher:
+  #   image: gcr.io/sap-se-commerce-arch/actiondispatcher:latest
+  #   restart: always
+  #   environment:
+  #     - MESSAGING_URI=amqp://guest:guest@rabbitmq:5672/
+  #   links:
+  #     - rabbitmq
+  #   depends_on: 
+  #     - rabbitmq
         

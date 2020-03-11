@@ -4,7 +4,7 @@ const NotFoundError = require("lib/errors/NotFoundError");
 const JSONValidationError = require("lib/errors/JSONValidationError");
 const ConflictError = require("lib/errors/ConflictError");
 const log = require("lib/log");
-const sendStatus = require("lib/rest").sendStatus;
+const sendBody = require("lib/rest").sendBody;
 
 
 const errorMappings = (function(mappings) {
@@ -43,7 +43,7 @@ function sendError(res, message, status = 500, code = "ERROR", details = null) {
     if (details) {
         body.details = details;
     }
-    sendStatus(res, status, body);
+    sendBody(res, status, body);
 };
 
 function errorHandler(err, req, res, next) {

@@ -31,7 +31,7 @@ app.post("/workflowdefs",
     validateJSONRequest("WorkflowDef"),
     asyncHandler(async (req, res) => {
         let result = await workflowDefRepo.create(req.body)
-        rest.sendStatus(res, HttpStatus.CREATED, result);
+        rest.sendBody(res, HttpStatus.CREATED, result);
     })
 );
 
@@ -39,8 +39,15 @@ app.post("/workflowdefs",
 app.get("/workflowdefs/:id",
     asyncHandler(async (req, res) => {
         let id = req.params["id"];
-        let doc = await workflowDefRepo.findById(id)
-        rest.sendStatus(res, HttpStatus.OK, doc);
+        let doc = await workflowDefRepo.findOneById(id)
+        if (doc) {
+            rest.sendBody(res, HttpStatus.OK, doc);
+        }
+        else {
+            rest.sendMessage(res, HttpStatus.NOT_FOUND,
+                "No workflow definition found with ID: " + id);
+        }
+
     })
 );
 
@@ -49,7 +56,7 @@ app.put("/workflowdefs/:id",
     asyncHandler(async (req, res) => {
         let id = req.params["id"];
         let result = await workflowDefRepo.update(id, req.body)
-        rest.sendStatus(res, HttpStatus.OK, result, result);
+        rest.sendBody(res, HttpStatus.OK, result, result);
     })
 );
 
@@ -57,24 +64,36 @@ app.delete("/workflowdefs/:id",
     asyncHandler(async (req, res) => {
         let id = req.params["id"];
         await workflowDefRepo.delete(id, req.body)
-        rest.sendStatus(res, HttpStatus.OK);
+        rest.sendBody(res, HttpStatus.OK);
     })
 );
 
 app.post("/workflows",
     validateJSONRequest("Workflow"),
     asyncHandler(async (req, res) => {
-        let result = await workflowRepo.create(req.body)
+        let workflow = req.body
+        let workflowDef = await workflowDefRepo.findOneById(workflow.workflowDefId)
+        if (!workflowDef) {
+            rest.sendMessage(res, HttpStatus.UNPROCESSABLE_ENTITY,
+                "Cannot find workflow definition with ID: " + workflow.workflowDefId);
+            return
+        }
+        let result = await workflowRepo.create(workflow)
         messaging.publish("actions", result)
-        rest.sendStatus(res, HttpStatus.CREATED, result);
+        rest.sendBody(res, HttpStatus.CREATED, result);
     })
 );
 
 app.get("/workflows/:id",
     asyncHandler(async (req, res) => {
         let id = req.params["id"];
-        let doc = await workflowRepo.findById(id)
-        rest.sendStatus(res, HttpStatus.OK, doc);
+        let doc = await workflowRepo.findOneById(id);
+        if (!doc) {
+            rest.sendMessage(res, HttpStatus.NOT_FOUND,
+                "Cannot find workflow with ID: " + id);
+            return
+        }
+        rest.sendBody(res, HttpStatus.OK, doc);
     })
 );
 
@@ -88,7 +107,8 @@ async function init() {
 
 init()
     .then(() => {
-        app.listen(3000, () => log.info("Workflow service listening on port 3000!"));
+        let port = process.env.PORT || 3000
+        app.listen(port, () => log.info("Workflow service listening on port " + port));
     })
     .catch((error) => {
         log.error("Cannot start server");

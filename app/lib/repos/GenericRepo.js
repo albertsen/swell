@@ -34,10 +34,10 @@ class GenericRepo {
         }
     }
 
-    async findById(id) {
+    async findOneById(id) {
         if (!id) throw new ValidationError("No ID given");
         let doc = await this.collection().findOne({ _id: id });
-        if (!doc) throw new NotFoundError("Could not find document with ID: " + id)
+        if (!doc) return null
         doc.id = doc._id
         delete doc._id;
         return doc;

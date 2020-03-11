@@ -1,10 +1,10 @@
 module.exports = {
     db: {
-        url: "mongodb://localhost:27017",
+        url: process.env.DB_URI || "mongodb://localhost:27017",
         dbName: "swell"
     },
     messaging: {
-        url: "amqp://localhost",
+        url: process.env.MESSAGING_URI || "amqp://localhost",
         exchanges: {
             actions: {
                 type: "fanout",
