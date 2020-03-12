@@ -28,12 +28,13 @@ test: cleandb
 	mocha tests/*.js
 
 docker:
-	$(DOCKER) build -t gcr.io/sap-se-commerce-arch/workflowservice:latest -f $(DOCKER_DIR)/services/workflowservice/Dockerfile .
+	$(DOCKER) build -t swell-base:latest -f $(DOCKER_DIR)/base/Dockerfile .
+	$(DOCKER) build -t swell-workflowservice:latest -f $(DOCKER_DIR)/services/workflowservice/Dockerfile .
 
-dockerup: docker
+dockerstart: docker
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) up --remove-orphans
 
-dockerdown:
+dockerstop:
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) down
 
 dockerrestart: docker

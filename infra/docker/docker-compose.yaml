@@ -16,7 +16,7 @@ services:
       - "5672:5672"
       - "15672:15672"
   workflowservice:
-    image: gcr.io/sap-se-commerce-arch/workflowservice:latest
+    image: swell-workflowservice:latest
     restart: always
     environment:
       - DB_URI=mongodb://mongo:27017

@@ -7,7 +7,6 @@ const asyncHandler = require('express-async-handler')
 const workflowDefRepo = require("lib/repos/WorkflowDefRepo");
 const workflowRepo = require("lib/repos/WorkflowRepo");
 const jsonValidator = require("lib/JSONValidator");
-const workflowDefManager = require("lib/WorkflowDefManager");
 const log = require("lib/log");
 const errorHandler = require("lib/errorHandler");
 const rest = require("lib/rest");
@@ -28,11 +27,29 @@ function validateJSONRequest(schemaName) {
     }
 }
 
+function validateWorkflowDef(workflowDef) {
+    let errors = [];
+    if (!workflowDef.steps.start) {
+        errors.push("Worflow definition doesn't have a 'start' step");
+    }
+    for (let [name, step] of Object.entries(workflowDef.steps)) {
+        if (!workflowDef.actionHandlers[name]) {
+            errors.push(`No action handler for step: '${name}'`);
+        }
+        for (let [event, stepName] of Object.entries(step)) {
+            if (!workflowDef.steps[stepName]) {
+                errors.push(`Event '${event}' triggers invalid step '${stepName}'`);
+            }
+        }
+    }
+    return errors
+}
+
 app.post("/workflowdefs",
     validateJSONRequest("WorkflowDef"),
     asyncHandler(async (req, res) => {
         let workflowDef = req.body;
-        errors = workflowDefManager.validateWorkflowDef(workflowDef);
+        errors = validateWorkflowDef(workflowDef);
         if (errors.length) {
             rest.sendMessages(res, HttpStatus.UNPROCESSABLE_ENTITY, errors);
             return
