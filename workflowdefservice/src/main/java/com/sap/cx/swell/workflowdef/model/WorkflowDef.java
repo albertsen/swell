@@ -1,6 +1,5 @@
-package com.sap.cx.swell.workflowdef.workflowdef.model.worflowdef;
+package com.sap.cx.swell.workflowdef.model;
 
-import com.sap.cx.swell.workflowdef.model.worflowdef.ActionHandlerDef;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,7 +25,7 @@ public class WorkflowDef {
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -34,7 +33,7 @@ public class WorkflowDef {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {
@@ -42,7 +41,7 @@ public class WorkflowDef {
     }
 
     public Map<String, ActionHandlerDef> getActionHandlers() {
-        return actionHandlers;
+        return this.actionHandlers;
     }
 
     public void setActionHandlers(Map<String, ActionHandlerDef> actionHandlers) {
@@ -50,7 +49,7 @@ public class WorkflowDef {
     }
 
     public Map<String, Map<String, String>> getSteps() {
-        return steps;
+        return this.steps;
     }
 
     public void setSteps(Map<String, Map<String, String>> steps) {

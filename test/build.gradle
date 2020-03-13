@@ -21,4 +21,10 @@ test {
     useJUnitPlatform()
 }
 
+task cleanData(type: Exec) {
+    commandLine "mongo", "swell", "--eval", "db.workflowDefs.drop()"
+    commandLine "mongo", "swell", "--eval", "db.workflows.drop()"
+}
+
+test.dependsOn cleanData
 test.dependsOn cleanTest

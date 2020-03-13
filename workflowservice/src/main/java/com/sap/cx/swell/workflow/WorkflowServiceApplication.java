@@ -1,13 +1,13 @@
-package com.sap.cx.swell.workflowdef;
+package com.sap.cx.swell.workflow;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SwellApplication {
+public class WorkflowServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SwellApplication.class, args);
+        SpringApplication.run(WorkflowServiceApplication.class, args);
     }
 
 }

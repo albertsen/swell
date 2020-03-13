@@ -1,4 +1,4 @@
-package com.sap.cx.swell.workflow.model.worflowdef;
+package com.sap.cx.swell.workflow.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,7 +22,7 @@ public class Workflow {
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -30,7 +30,7 @@ public class Workflow {
     }
 
     public String getWorkflowDefId() {
-        return workflowDefId;
+        return this.workflowDefId;
     }
 
     public void setWorkflowDefId(String workflowDefId) {
@@ -38,7 +38,7 @@ public class Workflow {
     }
 
     public Object getDocument() {
-        return document;
+        return this.document;
     }
 
     public void setDocument(Object document) {

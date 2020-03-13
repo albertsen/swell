@@ -23,5 +23,5 @@ dependencies {
 task dockerBuild(type: Exec) {
     dependsOn "assemble"
     workingDir "."
-    commandLine "docker", "build", "-t", "gcr.io/sap-se-commerce-arch/workflowdefservice:latest", "."
+    commandLine "docker", "build", "-t", "gcr.io/sap-se-commerce-arch/workflowservice:latest", "."
 }

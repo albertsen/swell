@@ -1,4 +1,4 @@
-package com.sap.cx.swell.workflowdef.model.worflowdef;
+package com.sap.cx.swell.workflowdef.model;
 
 import java.net.URL;
 
@@ -16,7 +16,7 @@ public class ActionHandlerDef {
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public void setType(String type) {
@@ -24,7 +24,7 @@ public class ActionHandlerDef {
     }
 
     public URL getUrl() {
-        return url;
+        return this.url;
     }
 
     public void setUrl(URL url) {

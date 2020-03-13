@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.lang.reflect.ParameterizedType;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public abstract class AbstractCrudHandler<S extends CrudService, D> {
 
     private final Class<D> documentClass;

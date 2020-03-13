@@ -9,7 +9,11 @@ subprojects {
     version = '0.1'
 }
 
-task dockerRun(type: Exec) {
+task test {
+    dependsOn "test:test"
+}
+
+task docker {
     dependsOn "workflowdefservice:dockerBuild"
-    commandLine "docker-compose", "up", "--remove-orphans"
+    dependsOn "workflowservice:dockerBuild"
 }
