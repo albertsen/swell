@@ -30,6 +30,16 @@ services:
     depends_on: 
       - mongo
       - rabbitmq
+  actiondispatcher:
+    image: swell-actiondispatcher:latest
+    restart: always
+    environment:
+      - MESSAGING_URI=amqp://guest:guest@rabbitmq:5672/
+    links:
+      - rabbitmq
+    depends_on: 
+      - rabbitmq
+    
   # actiondispatcher:
   #   image: gcr.io/sap-se-commerce-arch/actiondispatcher:latest
   #   restart: always

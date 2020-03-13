@@ -30,8 +30,9 @@ test: cleandb
 docker:
 	$(DOCKER) build -t swell-base:latest -f $(DOCKER_DIR)/base/Dockerfile .
 	$(DOCKER) build -t swell-workflowservice:latest -f $(DOCKER_DIR)/services/workflowservice/Dockerfile .
+	$(DOCKER) build -t swell-actiondispatcher:latest -f $(DOCKER_DIR)/workers/actiondispatcher/Dockerfile .
 
-dockerstart: docker
+dockerstart:
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) up --remove-orphans
 
 dockerstop:
