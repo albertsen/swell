@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 
 @Configuration
-public class ApiRouter {
+public class WorkflowDefApiRouter {
     @Bean
     public RouterFunction<ServerResponse> workflowDefRoute(WorkflowDefHandler handler) {
         return RouterFunctions

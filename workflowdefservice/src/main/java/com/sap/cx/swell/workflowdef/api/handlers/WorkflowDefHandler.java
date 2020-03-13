@@ -13,5 +13,4 @@ public class WorkflowDefHandler extends AbstractCrudHandler<WorkflowDefService, 
         super(workflowDefService);
     }
 
-
 }

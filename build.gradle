@@ -10,7 +10,7 @@ subprojects {
 }
 
 task test {
-    dependsOn "test:test"
+    dependsOn "apitest:test"
 }
 
 task docker {

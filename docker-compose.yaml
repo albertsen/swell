@@ -20,12 +20,15 @@ services:
       - DB_CONNECTION_STRING=mongodb://mongo:27017
       - DB_NAME=swell
       - SERVER_PORT=8081
+      - WORKFLOWDEF_SERVICE_URL=http://workflowdefservice:8080/workflowdefs/
     ports:
       - "8081:8081"
     links:
       - mongo
+      - workflowdefservice
     depends_on:
       - mongo
+      - workflowdefservice
   mongo:
     image: mongo:latest
     restart: always
