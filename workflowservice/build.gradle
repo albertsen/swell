@@ -13,10 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation project(":commons")
+    implementation project(":core")
 }
 
 task dockerBuild(type: Exec) {

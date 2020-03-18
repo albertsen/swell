@@ -1,9 +1,3 @@
 #/bin/sh
 
-(
-  docker-compose stop workflowservice
-  docker-compose stop workflowdefservice
-) && (
-  docker-compose up --no-deps -d workflowservice &&
-    docker-compose up --no-deps -d workflowdefservice
-)
+docker-compose stop workflowservice && docker-compose up --no-deps -d workflowservice

@@ -13,7 +13,18 @@ task test {
     dependsOn "apitest:test"
 }
 
-task docker {
-    dependsOn "workflowdefservice:dockerBuild"
+task dockerBuild {
     dependsOn "workflowservice:dockerBuild"
+}
+
+task clean {
+    dependsOn "apitest:clean"
+    dependsOn "core:clean"
+    dependsOn "workflowservice:clean"
+}
+
+task run {
+    dependsOn "core:assemble"
+    dependsOn "workflowservice:assemble"
+    dependsOn "workflowservice:bootRun"
 }

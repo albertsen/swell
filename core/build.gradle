@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+group = "com.sap.cx.swell"
+sourceCompatibility = "13"
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive:2.2.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:2.2.5.RELEASE'
+}

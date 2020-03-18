@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.adarshr.test-logger' version '2.0.0'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 }
 
 sourceCompatibility = '13'

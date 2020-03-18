@@ -1,5 +1,5 @@
 rootProject.name = "swell"
-include "commons"
+
+include "core"
 include "workflowservice"
-include "workflowdefservice"
 include "apitest"
