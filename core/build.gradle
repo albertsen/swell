@@ -12,4 +12,6 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive:2.2.5.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-webflux:2.2.5.RELEASE'
+    implementation 'org.springframework.amqp:spring-rabbit:2.2.5.RELEASE'
+    implementation 'io.projectreactor.rabbitmq:reactor-rabbitmq:1.4.1.RELEASE'
 }

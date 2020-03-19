@@ -1,4 +1,4 @@
-package com.sap.cx.swell.core.model;
+package com.sap.cx.swell.core.data;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -20,7 +20,10 @@ public class WorkflowDef {
     public WorkflowDef() {
     }
 
-    public WorkflowDef(String id, String description, Map<String, ActionHandlerDef> actionHandlers, Map<String, Map<String, String>> steps) {
+    public WorkflowDef(String id,
+                       String description,
+                       Map<String, ActionHandlerDef> actionHandlers,
+                       Map<String, Map<String, String>> steps) {
         this.id = id;
         this.description = description;
         this.actionHandlers = actionHandlers;
@@ -57,5 +60,13 @@ public class WorkflowDef {
 
     public void setSteps(Map<String, Map<String, String>> steps) {
         this.steps = steps;
+    }
+
+    public ActionHandlerDef getStartHandlerDef() {
+        return getHandlerDef("start");
+    }
+
+    public ActionHandlerDef getHandlerDef(String name) {
+        return actionHandlers.get(name);
     }
 }

@@ -1,7 +1,7 @@
 package com.sap.cx.swell.apitest.api.handlers;
 
 import com.sap.cx.swell.core.api.handlers.AbstractCrudHandler;
-import com.sap.cx.swell.core.model.WorkflowDef;
+import com.sap.cx.swell.core.data.WorkflowDef;
 import com.sap.cx.swell.core.services.WorkflowDefService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

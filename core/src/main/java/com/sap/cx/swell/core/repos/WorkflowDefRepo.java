@@ -1,6 +1,6 @@
 package com.sap.cx.swell.core.repos;
 
-import com.sap.cx.swell.core.model.WorkflowDef;
+import com.sap.cx.swell.core.data.WorkflowDef;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 

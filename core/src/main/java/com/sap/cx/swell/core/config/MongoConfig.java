@@ -16,15 +16,15 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 public class MongoConfig extends AbstractReactiveMongoConfiguration {
     private static Logger log = LoggerFactory.getLogger(MongoConfig.class);
 
-    @Value("${db.connectionString}")
-    private String connectionString;
+    @Value("${db.uri}")
+    private String uri;
 
     @Value("${db.name}")
     private String dbName;
 
     @Override
     public MongoClient reactiveMongoClient() {
-        return MongoClients.create(connectionString);
+        return MongoClients.create(uri);
     }
 
     @Override

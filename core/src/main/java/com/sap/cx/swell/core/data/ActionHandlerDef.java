@@ -1,4 +1,4 @@
-package com.sap.cx.swell.core.model;
+package com.sap.cx.swell.core.data;
 
 import org.springframework.lang.NonNull;
 
