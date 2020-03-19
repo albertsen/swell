@@ -13,8 +13,8 @@ defmodule Swell.Application do
       # Swell.Event.WorkerSupervisor,
       # Swell.Event.EventService,
       Swell.JSON.Validator,
-      {Swell.DB.WorkflowDefRepo, "workflow_defs"},
-      {Swell.DB.WorkflowRepo, "workflows"},
+      {Swell.Repos.WorkflowDefRepo, "workflowDefs"},
+      {Swell.Repos.WorkflowRepo, "workflows"},
       {Plug.Cowboy, scheme: :http, plug: Swell.Services.WorkflowEndpoint, options: [port: 8080]}
     ]
   end

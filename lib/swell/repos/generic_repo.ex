@@ -6,15 +6,15 @@ defmodule Swell.Repos.GenRepo do
       @db Keyword.get(Application.get_env(:swell, :db), :name)
       @me __MODULE__
 
-      def create(workflow_def) do
-        GenServer.call(@me, {:create, workflow_def})
+      def create(doc) when is_map(doc) do
+        GenServer.call(@me, {:create, doc})
       end
 
-      def find_by_id(id) do
+      def find_by_id(id) when is_binary(id) do
         GenServer.call(@me, {:find_by_id, id})
       end
 
-      def update(id, doc) do
+      def update(id, %{id: _id} = doc) when is_binary(id) do
         GenServer.call(@me, {:update, id, doc})
       end
 
@@ -22,12 +22,12 @@ defmodule Swell.Repos.GenRepo do
         GenServer.call(@me, {:delete, id})
       end
 
-      def start_link(collection) do
+      def start_link(collection) when is_binary(collection) do
         GenServer.start_link(@me, collection, name: @me)
       end
 
       @impl GenServer
-      def init(collection) do
+      def init(collection) when is_binary(collection) do
         {:ok, collection}
       end
 
@@ -75,9 +75,7 @@ defmodule Swell.Repos.GenRepo do
       end
 
       @impl GenServer
-      def handle_call({:update, id, doc}, _from, collection) when is_binary(id) and is_map(doc) do
-        if !Map.has_key?(doc, :id), do: raise("Document doesn't have an ID")
-
+      def handle_call({:update, id, %{id: _id} = doc}, _from, collection) when is_binary(id) do
         if doc.id != id,
           do: raise("ID of document [#{doc.id}] and ID provided in resource [#{id}] don't match")
 

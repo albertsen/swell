@@ -5,7 +5,7 @@ defmodule Swell.Test.WorkflowServiceTest do
   @url "http://localhost:8080/workflowdefs"
 
   test "Worfklow definition CRUD" do
-    json = File.read!("test/data/workflowdefs/fulfilorder.json")
+    json = File.read!("test/data/workflow_def.json")
     workflow_def = Jason.decode!(json, keys: :atoms)
     {status, doc} = Client.post(@url, workflow_def)
     assert status == :created

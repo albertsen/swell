@@ -13,7 +13,8 @@ test: purgedata
 	mix test
 
 purgedb:
-	mongo swell --quiet --eval "db.workflow_defs.deleteMany({})" 
+	mongo swell --quiet --eval "db.workflowDefs.deleteMany({})" 
+	mongo swell --quiet --eval "db.workflows.deleteMany({})" 
 
 purgequeues:
 	rabbitmqadmin -f tsv -q list queues name | xargs -I qn rabbitmqadmin delete queue name=qn

@@ -16,23 +16,23 @@ defmodule Swell.Services.WorkflowEndpoint do
   plug(:dispatch)
 
   get "/workflowdefs/:id" do
-    WorkflowDefService.get_for_id(id)
+    WorkflowDefService.get_with_id(id)
     |> send_json_response(conn)
   end
 
   post "/workflowdefs" do
     conn.body_params
-    |> WorkflowDefRepo.create()
+    |> WorkflowDefService.create()
     |> send_json_response(conn)
   end
 
   put "/workflowdefs/:id" do
-    WorkflowDefRepo.update(id, conn.body_params)
+    WorkflowDefService.update(id, conn.body_params)
     |> send_json_response(conn)
   end
 
   delete "/workflowdefs/:id" do
-    WorkflowDefRepo.delete(id)
+    WorkflowDefService.delete(id)
     |> send_json_response(conn)
   end
 
