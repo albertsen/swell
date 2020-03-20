@@ -33,11 +33,8 @@ defmodule Swell.Repos.GenRepo do
 
       @impl GenServer
       def handle_call({:create, doc}, _from, collection) when is_map(doc) do
-        doc = doc
-          |> Map.put_new_lazy(:id, fn -> UUID.uuid4() end)
-          |> Map.put(:_id, doc.id)
+        doc = Map.put(doc, :_id, Map.get_lazy(doc, :id, fn -> UUID.uuid4() end))
         res = Mongo.insert_one(@db, collection, doc)
-
         reply =
           case res do
             {:ok, %Mongo.InsertOneResult{inserted_id: inserted_id}} ->
@@ -45,12 +42,9 @@ defmodule Swell.Repos.GenRepo do
                 doc
                 |> Map.delete(:_id)
                 |> Map.put(:id, inserted_id)
-
               {:created, doc}
-
             {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000}]}} ->
               {:conflict, %{message: "A document already exists with ID: #{doc.id}"}}
-
             {:error, error} ->
               Logger.error("Error creating document: #{inspect(error)}")
               {:internal_server_error, %{message: "An error occurred"}}
