@@ -1,0 +1,121 @@
+{
+  "workflowDefId": "fulfilorder",
+  "document": {
+    "id": "beerOrder",
+    "status": "PLACED",
+    "lineItems": [
+      {
+        "product": {
+          "id": "augustiner",
+          "name": {
+            "de": "Augustiner Helles"
+          },
+          "price": {
+            "value": 100,
+            "currency": "EUR",
+            "gross": true
+          },
+          "taxes": {
+            "vat": {
+              "value": 16,
+              "currency": "EUR"
+            }
+          }
+        },
+        "amount": {
+          "value": 12,
+          "unit": "pieces"
+        },
+        "totalPrice": {
+          "value": 1200,
+          "currency": "EUR",
+          "gross": true
+        },
+        "taxes": {
+          "vat": {
+            "value": 160,
+            "currency": "EUR"
+          }
+        }
+      },
+      {
+        "product": {
+          "id": "giesinger",
+          "name": {
+            "de": "Giesinger Erhellung"
+          },
+          "price": {
+            "value": 120,
+            "currency": "EUR",
+            "gross": true
+          },
+          "taxes": {
+            "vat": {
+              "value": 19,
+              "currency": "EUR"
+            }
+          }
+        },
+        "amount": {
+          "value": 12,
+          "unit": "pieces"
+        },
+        "totalPrice": {
+          "value": 1440,
+          "currency": "EUR",
+          "gross": true
+        },
+        "taxes": {
+          "vat": {
+            "value": 190,
+            "currency": "EUR"
+          }
+        }
+      }
+    ],
+    "totalPrice": {
+      "value": 1640,
+      "currency": "EUR",
+      "gross": true
+    },
+    "totalTaxes": {
+      "vat": {
+        "value": 310,
+        "currency": "EUR"
+      }
+    },
+    "deliveryCosts": {
+      "value": 0,
+      "currency": "EUR",
+      "gross": true
+    },
+    "deliveryMethod": {
+      "code": "dhl"
+    },
+    "customer": {
+      "name": "Jürgen Albertsen",
+      "email": "juergen.albertsen@sap.com"
+    },
+    "billingAddress": {
+      "lines": [
+        "Jürgen Albertsen"
+      ],
+      "street": "Walserstr",
+      "streetNo": "1",
+      "postcode": "81667",
+      "city": "München",
+      "country": "DE"
+    },
+    "shippingAddress": {
+      "lines": [
+        "Jürgen Albertsen",
+        "SAP"
+      ],
+      "street": "Nymphenburger Str",
+      "streetNo": "86",
+      "postcode": "80636",
+      "city": "München",
+      "country": "DE"
+    }
+  }
+}

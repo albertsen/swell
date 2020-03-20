@@ -16,8 +16,6 @@ defmodule Swell.JSON.Validator do
     schemas =
       Application.get_env(:swell, :schemas)
       |> Enum.map(fn {name, file} ->
-        Logger.debug("Loading schema for '#{name}' from file '#{file}'")
-
         {
           name,
           load_schema(file)

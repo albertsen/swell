@@ -38,7 +38,7 @@ defmodule Swell.Map.Helpers do
 
   def atomize_keys(map = %{}) do
     map
-    |> Enum.map(fn {k, v} -> {String.to_atom(k), atomize_keys(v)} end)
+    |> Enum.map(fn {k, v} -> {atomize(k), atomize_keys(v)} end)
     |> Enum.into(%{})
   end
 
@@ -92,4 +92,11 @@ defmodule Swell.Map.Helpers do
   defp deep_resolve(_key, _left, right) do
     right
   end
+
+  defp atomize(str) when is_binary(str), do: String.to_atom(str)
+
+  defp atomize(atom) when is_atom(atom), do: atom
+
+  defp atomize(v), do: v
+
 end

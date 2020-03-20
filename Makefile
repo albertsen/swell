@@ -9,7 +9,7 @@ RABBITMQCTL=rabbitmqctl
 build:
 	mix compile
 
-test: purgedata
+test: build purgedata
 	mix test
 
 purgedb:

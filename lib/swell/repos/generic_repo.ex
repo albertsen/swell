@@ -35,16 +35,16 @@ defmodule Swell.Repos.GenRepo do
       def handle_call({:create, doc}, _from, collection) when is_map(doc) do
         doc = Map.put(doc, :_id, Map.get_lazy(doc, :id, fn -> UUID.uuid4() end))
         res = Mongo.insert_one(@db, collection, doc)
+
         reply =
           case res do
             {:ok, %Mongo.InsertOneResult{inserted_id: inserted_id}} ->
-              doc =
-                doc
-                |> Map.delete(:_id)
-                |> Map.put(:id, inserted_id)
+              doc = convert_doc(doc, inserted_id)
               {:created, doc}
+
             {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000}]}} ->
               {:conflict, %{message: "A document already exists with ID: #{doc.id}"}}
+
             {:error, error} ->
               Logger.error("Error creating document: #{inspect(error)}")
               {:internal_server_error, %{message: "An error occurred"}}
@@ -59,10 +59,7 @@ defmodule Swell.Repos.GenRepo do
 
         reply =
           if doc do
-            {:ok,
-             doc
-             |> Map.delete("_id")
-             |> Swell.Map.Helpers.atomize_keys()}
+            {:ok, convert_doc(doc, id)}
           else
             {:not_found, %{message: "No document found with ID: #{id}"}}
           end
@@ -75,7 +72,10 @@ defmodule Swell.Repos.GenRepo do
         if doc.id != id,
           do: raise("ID of document [#{doc.id}] and ID provided in resource [#{id}] don't match")
 
-        res = Mongo.replace_one(@db, collection, %{_id: id}, doc)
+        update_doc = doc
+          |> Map.put(:_id, id)
+          |> Map.delete(:id)
+        res = Mongo.replace_one(@db, collection, %{_id: id}, update_doc )
 
         reply =
           case res do
@@ -109,6 +109,14 @@ defmodule Swell.Repos.GenRepo do
 
         {:reply, reply, collection}
       end
+
+      defp convert_doc(doc, id) do
+        doc
+        |> Swell.Map.Helpers.atomize_keys()
+        |> Map.put(:id, id)
+        |> Map.delete(:_id)
+      end
+
     end
   end
 end
