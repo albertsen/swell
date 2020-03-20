@@ -1,5 +1,6 @@
 defmodule Swell.Services.WorkflowEndpoint do
   alias Swell.Services.WorkflowDefService
+  alias Swell.Services.WorkflowService
   import Swell.Endpoints.Helper
   require Logger
   use Plug.Router
@@ -12,6 +13,7 @@ defmodule Swell.Services.WorkflowEndpoint do
   )
 
   plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflowdefs", :workflow_def})
+  plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflows", :workflow})
   plug(:match)
   plug(:dispatch)
 
@@ -35,6 +37,17 @@ defmodule Swell.Services.WorkflowEndpoint do
     WorkflowDefService.delete(id)
     |> send_json_response(conn)
   end
+
+  post "/workflows" do
+    WorkflowService.create(conn.body_params)
+    |> send_json_response(conn)
+  end
+
+  get "/workflows/:id" do
+    WorkflowService.get_with_id(id)
+    |> send_json_response(conn)
+  end
+
 
   match _ do
     send_json_response({:not_found, "Not found"}, conn)

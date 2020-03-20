@@ -22,3 +22,6 @@ purgequeues:
 	rabbitmqadmin -f tsv -q list exchanges name | grep -v amq | xargs -I qn rabbitmqadmin delete exchange name=qn
 
 purgedata: purgedb purgequeues
+
+run:
+	mix run --no-halt

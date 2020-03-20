@@ -32,26 +32,28 @@ defmodule Swell.Repos.GenRepo do
       end
 
       @impl GenServer
-      def handle_call({:create, workflow_def}, _from, collection) when is_map(workflow_def) do
-        workflow_def = Map.put_new(workflow_def, :_id, workflow_def[:id])
-        res = Mongo.insert_one(@db, collection, workflow_def)
+      def handle_call({:create, doc}, _from, collection) when is_map(doc) do
+        doc = doc
+          |> Map.put_new_lazy(:id, fn -> UUID.uuid4() end)
+          |> Map.put(:_id, doc.id)
+        res = Mongo.insert_one(@db, collection, doc)
 
         reply =
           case res do
             {:ok, %Mongo.InsertOneResult{inserted_id: inserted_id}} ->
-              workflow_def =
-                workflow_def
+              doc =
+                doc
                 |> Map.delete(:_id)
                 |> Map.put(:id, inserted_id)
 
-              {:created, workflow_def}
+              {:created, doc}
 
             {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000}]}} ->
-              {:conflict, %{message: "A document already exists with ID: #{workflow_def.id}"}}
+              {:conflict, %{message: "A document already exists with ID: #{doc.id}"}}
 
             {:error, error} ->
               Logger.error("Error creating document: #{inspect(error)}")
-              {:internal_server_errror, %{message: "An error occurred"}}
+              {:internal_server_error, %{message: "An error occurred"}}
           end
 
         {:reply, reply, collection}
@@ -59,12 +61,12 @@ defmodule Swell.Repos.GenRepo do
 
       @impl GenServer
       def handle_call({:find_by_id, id}, _from, collection) when is_binary(id) do
-        workflow_def = Mongo.find_one(@db, collection, %{_id: id})
+        doc = Mongo.find_one(@db, collection, %{_id: id})
 
         reply =
-          if workflow_def do
+          if doc do
             {:ok,
-             workflow_def
+             doc
              |> Map.delete("_id")
              |> Swell.Map.Helpers.atomize_keys()}
           else
