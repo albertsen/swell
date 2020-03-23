@@ -1,6 +1,7 @@
-package com.sap.cx.swell.apitest.api.config;
+package com.sap.cx.swell.workflowservice.api.config;
 
-import com.sap.cx.swell.apitest.api.handlers.WorkflowDefHandler;
+
+import com.sap.cx.swell.workflowservice.api.handlers.WorkflowDefHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;

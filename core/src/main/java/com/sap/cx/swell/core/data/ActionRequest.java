@@ -1,14 +1,16 @@
-package com.sap.cx.swell.core.msg;
+package com.sap.cx.swell.core.data;
 
-import com.sap.cx.swell.core.data.ActionHandlerDef;
+import java.time.LocalDateTime;
 
 public class ActionRequest {
 
+    private LocalDateTime timestamp;
     private String workflowId;
     private String workflowDefId;
     private ActionHandlerDef handlerDef;
 
     public ActionRequest(String workflowId, String workflowDefId, ActionHandlerDef handlerDef) {
+        this.timestamp = LocalDateTime.now();
         this.workflowId = workflowId;
         this.workflowDefId = workflowDefId;
         this.handlerDef = handlerDef;
@@ -24,5 +26,9 @@ public class ActionRequest {
 
     public ActionHandlerDef getHandlerDef() {
         return handlerDef;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 }

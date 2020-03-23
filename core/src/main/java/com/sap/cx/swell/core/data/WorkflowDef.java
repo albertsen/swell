@@ -1,6 +1,7 @@
 package com.sap.cx.swell.core.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.NonNull;
@@ -8,6 +9,7 @@ import org.springframework.lang.NonNull;
 import java.util.Map;
 
 @Document(collection = "workflowDefs")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WorkflowDef {
 
     @Id

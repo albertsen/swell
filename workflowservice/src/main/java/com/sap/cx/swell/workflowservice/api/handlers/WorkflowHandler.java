@@ -1,4 +1,4 @@
-package com.sap.cx.swell.apitest.api.handlers;
+package com.sap.cx.swell.workflowservice.api.handlers;
 
 import com.sap.cx.swell.core.api.handlers.AbstractCrudHandler;
 import com.sap.cx.swell.core.data.Workflow;

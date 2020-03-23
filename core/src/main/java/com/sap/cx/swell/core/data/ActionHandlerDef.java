@@ -1,9 +1,11 @@
 package com.sap.cx.swell.core.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.lang.NonNull;
 
 import java.net.URL;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActionHandlerDef {
 
     @NonNull

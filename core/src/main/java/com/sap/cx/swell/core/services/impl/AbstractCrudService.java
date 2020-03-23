@@ -18,14 +18,11 @@ public abstract class AbstractCrudService<T> {
 
     public Mono<T> create(T doc) {
         return repo.insert(doc)
-                .flatMap((insertedDoc) -> {
-                    LOG.info(insertedDoc.toString());
-                    return Mono.just(insertedDoc);
-                })
+                .flatMap((insertedDoc) -> Mono.just(insertedDoc))
                 .onErrorMap(DuplicateKeyException.class,
                         e -> {
-                            LOG.error("Error ceeating document", e);
-                            return new ConflictException("Conflict creating document");
+                            LOG.error("Error creating document", e);
+                            return new ConflictException("A document with same ID already exists");
                         });
     }
 

@@ -20,11 +20,13 @@ task dockerBuild {
 task clean {
     dependsOn "apitest:clean"
     dependsOn "core:clean"
+    dependsOn "actionhandler:clean"
     dependsOn "workflowservice:clean"
 }
 
 task run {
     dependsOn "core:assemble"
+    dependsOn "actionhandler:assemble"
     dependsOn "workflowservice:assemble"
     dependsOn "workflowservice:bootRun"
 }
