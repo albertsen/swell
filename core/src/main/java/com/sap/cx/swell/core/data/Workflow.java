@@ -18,33 +18,37 @@ public class Workflow {
     public Workflow() {
     }
 
-    public Workflow(String id, String workflowDefId, Object document) {
-        this.id = id;
-        this.workflowDefId = workflowDefId;
-        this.document = document;
-    }
-
     public String getId() {
-        return this.id;
+        return id;
     }
 
-    public void setId(String id) {
+    public Workflow setId(String id) {
         this.id = id;
+        return this;
     }
 
     public String getWorkflowDefId() {
-        return this.workflowDefId;
+        return workflowDefId;
     }
 
-    public void setWorkflowDefId(String workflowDefId) {
+    public Workflow setWorkflowDefId(String workflowDefId) {
         this.workflowDefId = workflowDefId;
+        return this;
     }
 
     public Object getDocument() {
-        return this.document;
+        return document;
     }
 
-    public void setDocument(Object document) {
+    public Workflow setDocument(Object document) {
         this.document = document;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Workflow{" +
+                "id='" + id + '\'' +
+                '}';
     }
 }

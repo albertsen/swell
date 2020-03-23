@@ -4,7 +4,7 @@ Feature: Workflow Def CRUD
     * header Accept = 'application/json'
     * json doc = read('classpath:com/sap/cx/swell/apitest/WorkflowDef.json')
 
-  Scenario: CRUD
+  Scenario: CRUD workflow def
     # Create
     Given url 'http://localhost:8080/workflowdefs/'
     And request doc

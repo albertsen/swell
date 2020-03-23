@@ -38,7 +38,9 @@ public class WorkflowServiceImpl extends AbstractCrudService<Workflow> implement
         return workflowDefService.findById(workflow.getWorkflowDefId())
                 .switchIfEmpty(Mono.error(
                         new InvalidDataException("No workflow definition found with ID %s", workflow.getWorkflowDefId())))
-                .flatMap((workflowDef) -> Mono.just(new WorkflowSpec(workflow, workflowDef)))
+                .flatMap((workflowDef) ->
+                        super.create(workflow)
+                                .flatMap((createdWorkflow) -> Mono.just(new WorkflowSpec(workflow, workflowDef))))
                 .flatMap((workflowSpec) -> {
                     startWorkflow(workflowSpec);
                     return Mono.just(workflowSpec.getWorkflow());

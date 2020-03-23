@@ -20,18 +20,20 @@ public class ActionHandlerDef {
     }
 
     public String getType() {
-        return this.type;
+        return type;
     }
 
-    public void setType(String type) {
+    public ActionHandlerDef setType(String type) {
         this.type = type;
+        return this;
     }
 
     public URL getUrl() {
-        return this.url;
+        return url;
     }
 
-    public void setUrl(URL url) {
+    public ActionHandlerDef setUrl(URL url) {
         this.url = url;
+        return this;
     }
 }

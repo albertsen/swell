@@ -2,33 +2,33 @@ Feature: Workflow
 
   Background:
     * header Accept = 'application/json'
+    * json workflowDef = read('classpath:com/sap/cx/swell/apitest/WorkflowDef.json')
+    * json workflow = read('classpath:com/sap/cx/swell/apitest/Workflow.json')
 
-  Scenario: Create & Read
+  Scenario: Create & read workflow
     # Create Wrofklow def
     Given url 'http://localhost:8080/workflowdefs/'
-    And request read('classpath:com/sap/cx/swell/apitest/WorkflowDef.json')
+    And request workflowDef
     And method post
     Then status 201
     # Create workflow
-    * json doc = read('classpath:com/sap/cx/swell/apitest/Workflow.json')
     Given url 'http://localhost:8080/workflows/'
-    When request doc
+    When request workflow
     And method post
     Then status 201
     And match response.id == '#present'
-    * set doc.id = response.id
-    And match response == doc
+    * set workflow.id = response.id
+    And match response == workflow
     # Read workflow
-    When path doc.id
+    When path workflow.id
     And method get
     Then status 200
-    And match response == doc
+    And match response == workflow
 
   Scenario: Reject workflow with invalid workflow def
-    * json doc = read('classpath:com/sap/cx/swell/apitest/Workflow.json')
-    * set doc.workflowDefId = "doesnotexist"
+    * set workflow.workflowDefId = "doesnotexist"
     # Create workflow
     Given url 'http://localhost:8080/workflows/'
-    When request doc
+    When request workflow
     And method post
     Then status 422
