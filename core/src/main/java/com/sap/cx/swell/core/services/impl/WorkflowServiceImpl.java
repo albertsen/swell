@@ -45,10 +45,9 @@ public class WorkflowServiceImpl extends AbstractCrudService<Workflow> implement
                 .flatMap((workflowDef) ->
                         super.create(workflow)
                                 .flatMap((createdWorkflow) -> Mono.just(new WorkflowData(createdWorkflow, workflowDef))))
-                .flatMap((workflowData) -> {
-                    startWorkflow(workflowData).subscribe();
-                    return Mono.just(workflowData.getWorkflow());
-                });
+                .delayUntil(this::startWorkflow)
+                .flatMap((workflowData) -> Mono.just(workflowData.getWorkflow()));
+
     }
 
     private Mono<Void> startWorkflow(WorkflowData workflowData) {
