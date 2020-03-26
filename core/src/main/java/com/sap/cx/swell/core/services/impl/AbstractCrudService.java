@@ -1,6 +1,7 @@
 package com.sap.cx.swell.core.services.impl;
 
 import com.sap.cx.swell.core.exceptions.ConflictException;
+import com.sap.cx.swell.core.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -21,13 +22,13 @@ public abstract class AbstractCrudService<T> {
                 .flatMap((insertedDoc) -> Mono.just(insertedDoc))
                 .onErrorMap(DuplicateKeyException.class,
                         e -> {
-                            LOG.error("Error creating document", e);
                             return new ConflictException("A document with same ID already exists");
                         });
     }
 
     public Mono<T> findById(String id) {
-        return repo.findById(id);
+        return repo.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("No document found with ID '%s", id)));
     }
 
     public Mono<T> update(T doc) {

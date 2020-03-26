@@ -16,7 +16,7 @@ public class WorkflowDef {
     private String id;
     private String description;
     @NonNull
-    private Map<String, ActionHandlerDef> actionHandlers;
+    private Map<String, ActionHandler> actionHandlers;
     @NonNull
     private Map<String, Map<String, String>> steps;
 
@@ -41,11 +41,11 @@ public class WorkflowDef {
         return this;
     }
 
-    public Map<String, ActionHandlerDef> getActionHandlers() {
+    public Map<String, ActionHandler> getActionHandlers() {
         return actionHandlers;
     }
 
-    public WorkflowDef setActionHandlers(Map<String, ActionHandlerDef> actionHandlers) {
+    public WorkflowDef setActionHandlers(Map<String, ActionHandler> actionHandlers) {
         this.actionHandlers = actionHandlers;
         return this;
     }
@@ -60,11 +60,11 @@ public class WorkflowDef {
     }
 
     @JsonIgnore
-    public ActionHandlerDef getStartHandlerDef() {
-        return getHandlerDef("start");
+    public ActionHandler getStartActionHandler() {
+        return getActionHandler("start");
     }
 
-    public ActionHandlerDef getHandlerDef(String name) {
+    public ActionHandler getActionHandler(String name) {
         return actionHandlers.get(name);
     }
 

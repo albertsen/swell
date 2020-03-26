@@ -6,17 +6,17 @@ import org.springframework.lang.NonNull;
 import java.net.URL;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ActionHandlerDef {
+public class ActionHandler {
 
     @NonNull
     private String type;
     @NonNull
     private URL url;
 
-    public ActionHandlerDef() {
+    public ActionHandler() {
     }
 
-    public ActionHandlerDef(String type, URL url) {
+    public ActionHandler(String type, URL url) {
         this.type = type;
         this.url = url;
     }
@@ -25,7 +25,7 @@ public class ActionHandlerDef {
         return type;
     }
 
-    public ActionHandlerDef setType(String type) {
+    public ActionHandler setType(String type) {
         this.type = type;
         return this;
     }
@@ -34,7 +34,7 @@ public class ActionHandlerDef {
         return url;
     }
 
-    public ActionHandlerDef setUrl(URL url) {
+    public ActionHandler setUrl(URL url) {
         this.url = url;
         return this;
     }

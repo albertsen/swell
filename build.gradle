@@ -1,12 +1,14 @@
 allprojects {
+    group = "com.sap.cx.swell"
+    version = "0.1"
     repositories {
         jcenter()
     }
-
 }
+
 subprojects {
-    group = 'com.sap.cx.swell'
-    version = '0.1'
+    apply plugin: "java"
+    sourceCompatibility = "11"
 }
 
 task test {

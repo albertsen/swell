@@ -3,10 +3,11 @@ package com.sap.cx.swell.core.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cx.swell.core.constants.Messaging;
-import com.sap.cx.swell.core.data.ActionRequest;
 import com.sap.cx.swell.core.data.Workflow;
 import com.sap.cx.swell.core.data.WorkflowDef;
 import com.sap.cx.swell.core.exceptions.InvalidDataException;
+import com.sap.cx.swell.core.exceptions.NotFoundException;
+import com.sap.cx.swell.core.messages.ActionRequest;
 import com.sap.cx.swell.core.repos.WorkflowRepo;
 import com.sap.cx.swell.core.services.WorkflowDefService;
 import com.sap.cx.swell.core.services.WorkflowService;
@@ -40,8 +41,8 @@ public class WorkflowServiceImpl extends AbstractCrudService<Workflow> implement
     @Override
     public Mono<Workflow> create(Workflow workflow) {
         return workflowDefService.findById(workflow.getWorkflowDefId())
-                .switchIfEmpty(Mono.error(
-                        new InvalidDataException("No workflow definition found with ID %s", workflow.getWorkflowDefId())))
+                .onErrorMap(NotFoundException.class, e ->
+                        new InvalidDataException("No workflow definition found with ID %s", workflow.getWorkflowDefId()))
                 .flatMap((workflowDef) ->
                         super.create(workflow)
                                 .flatMap((createdWorkflow) -> Mono.just(new WorkflowData(createdWorkflow, workflowDef))))
@@ -56,10 +57,11 @@ public class WorkflowServiceImpl extends AbstractCrudService<Workflow> implement
 
     private Publisher<OutboundMessage> createStartMessage(WorkflowData workflowData) {
         return Mono.just(workflowData)
-                .flatMap((spec) -> Mono.just(new ActionRequest(
-                        spec.getWorkflow().getId(),
-                        spec.getWorkflowDef().getId(),
-                        spec.getWorkflowDef().getStartHandlerDef())))
+                .flatMap((data) -> Mono.just(new ActionRequest()
+                        .setActionName("start")
+                        .setWorkflowId(workflowData.getWorkflow().getId())
+                        .setWorkflowDefId(workflowData.getWorkflowDef().getId())
+                        .setHandler(data.getWorkflowDef().getActionHandler("start"))))
                 .flatMap((actionRequest) -> {
                     return Mono.fromCallable(() -> {
                         try {
