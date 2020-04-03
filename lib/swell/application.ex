@@ -3,7 +3,9 @@ defmodule Swell.Application do
   import Supervisor.Spec
 
   def start(_type, _args) do
-    Supervisor.start_link(children(), opts())
+    {:ok, pid} = Supervisor.start_link(children(), opts())
+    set_up()
+    {:ok, pid}
   end
 
   defp children() do
@@ -13,7 +15,6 @@ defmodule Swell.Application do
       {Swell.Repos.WorkflowDefRepo, "workflowDefs"},
       {Swell.Repos.WorkflowRepo, "workflows"},
       Swell.WorkerSupervisor,
-      Swell.Messaging.ConnectionFactory,
       Swell.Messaging.Manager,
       {Swell.Messaging.Publishers.ActionPublisher, "actions"},
       {Plug.Cowboy, scheme: :http, plug: Swell.Services.WorkflowEndpoint, options: [port: 8080]}
@@ -25,5 +26,9 @@ defmodule Swell.Application do
       strategy: :one_for_one,
       name: Swell.Supervisor
     ]
+  end
+
+  defp set_up do
+    Swell.Messaging.Topology.set_up()
   end
 end

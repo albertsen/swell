@@ -15,7 +15,7 @@ defmodule Swell.Messaging.Publisher do
 
       @impl GenServer
       def init(queue) do
-        channel = Swell.Messaging.ConnectionFactory.open_channel()
+        {:ok, channel} = Swell.Messaging.Manager.open_channel()
         {:ok, {channel, queue}}
       end
 

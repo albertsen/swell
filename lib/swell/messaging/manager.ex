@@ -2,10 +2,17 @@ defmodule Swell.Messaging.Manager do
   @me __MODULE__
   use GenServer
   require Logger
-  alias Swell.Messaging.ConnectionFactory
 
   def start_link(_) do
     GenServer.start(@me, nil, name: @me)
+  end
+
+  def open_channel() do
+    GenServer.call(@me, :open_channel)
+  end
+
+  def close_channel(channel) do
+    GenServer.call(@me, {:close_channel, channel})
   end
 
   def consume(channel, queue) when is_binary(queue) do
@@ -13,7 +20,7 @@ defmodule Swell.Messaging.Manager do
   end
 
   def cancel(channel, consumer_tag) do
-    AMQP.Basic.cancel(channel, consumer_tag)
+    {:ok, _} = AMQP.Basic.cancel(channel, consumer_tag)
   end
 
   def publish(channel, exchange, message) do
@@ -28,44 +35,29 @@ defmodule Swell.Messaging.Manager do
   end
 
   def ack(channel, delivery_tag) do
-    AMQP.Basic.ack(channel, delivery_tag)
+    :ok = AMQP.Basic.ack(channel, delivery_tag)
   end
 
   @impl GenServer
   def init(_) do
-    channel = ConnectionFactory.open_channel()
-
-    try do
-      Application.get_env(:swell, :messaging)
-      |> setup(channel)
-    rescue
-      err in _ ->
-        Logger.error(Exception.format(:error, err, __STACKTRACE__))
-        AMQP.Channel.close(channel)
-        raise err
-    end
-
-    {:ok, nil}
+    {:ok, _connection} = AMQP.Connection.open()
   end
 
-  defp setup(_opts = [topology: topology], chann), do: setup_topology(topology, chann)
+  @impl GenServer
+  def handle_call(:open_channel, _from, connection) do
+    res = {:ok, channel} = AMQP.Channel.open(connection)
+    :ok = AMQP.Basic.qos(channel, prefetch_count: 1)
+    {:reply, res, connection}
+  end
 
-  defp setup_topology(toploogy, chann) when is_map(toploogy) do
-    Enum.each(toploogy, fn {exchange, queues} ->
-      exchange = to_string(exchange)
-      :ok = AMQP.Exchange.declare(chann, exchange, :fanout, durable: true)
+  @impl GenServer
+  def handle_call({:close_channel, channel}, _from, connection) do
+    res = AMQP.Channel.close(channel)
+    {:reply, res, connection}
+  end
 
-      Enum.each(queues, fn {queue, consumer_module, worker_count} ->
-        queue = to_string(queue)
-        {:ok, _} = AMQP.Queue.declare(chann, queue, durable: true)
-        :ok = AMQP.Queue.bind(chann, queue, exchange)
-
-        Swell.WorkerSupervisor.start_workers(
-          Swell.Messaging.ComsumerWorker,
-          {queue, consumer_module},
-          worker_count
-        )
-      end)
-    end)
+  @impl GenServer
+  def terminate(_reason, connection) do
+    AMQP.Connection.close(connection)
   end
 end

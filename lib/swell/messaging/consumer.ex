@@ -3,8 +3,8 @@ defmodule Swell.Messaging.Consumer do
   require Logger
 
   def init_consumer(queue) do
-    channel = Swell.Messaging.ConnectionFactory.open_channel()
-    Swell.Messaging.Manager.consume(channel, queue)
+    {:ok, channel} = Swell.Messaging.Manager.open_channel()
+    {:ok, _} = Swell.Messaging.Manager.consume(channel, queue)
     {:ok, channel}
   end
 
