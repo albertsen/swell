@@ -48,6 +48,11 @@ defmodule Swell.Services.WorkflowEndpoint do
     |> send_json_response(conn)
   end
 
+  get "/action" do
+    doc = conn.body_params
+    order_status = conn.params["orderStatus"]
+    event = conn.params["event"]
+  end
 
   match _ do
     send_json_response({:not_found, "Not found"}, conn)

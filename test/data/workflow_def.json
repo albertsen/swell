@@ -1,34 +1,35 @@
 {
     "id": "fulfilorder",
     "description": "Example order fulfilment process",
-    "actionHandlers": {
+    "status": "PLACED",
+    "actionactionrs": {
         "start": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=CREATED&event=started"
+            "url": "http://loalhost:3010/action?orderStatus=CREATED&event=started"
         },
         "checkOrder": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=CHECKED&event=orderChecked"
+            "url": "http://loalhost:3010/action?orderStatus=CHECKED&event=orderChecked"
         },
         "capturePayment": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=PAYMENT_CAPTURED&event=paymentCaptured"
+            "url": "http://loalhost:3010/action?orderStatus=PAYMENT_CAPTURED&event=paymentCaptured"
         },
         "prepareShipment": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=SHIPMENT_PREPARED&event=shipmentPrepared"
+            "url": "http://loalhost:3010/action?orderStatus=SHIPMENT_PREPARED&event=shipmentPrepared"
         },
         "ship": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=SHIPPED&event=shipped"
+            "url": "http://loalhost:3010/action?orderStatus=SHIPPED&event=shipped"
         },
         "error": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=ERROR&event=error"
+            "url": "http://loalhost:3010/action?orderStatus=ERROR&event=error"
         },
         "done": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=COMPLETED&event=done"
+            "url": "http://loalhost:3010/action?orderStatus=COMPLETED&event=done"
         }
     },
     "steps": {
