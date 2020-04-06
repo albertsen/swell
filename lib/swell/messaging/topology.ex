@@ -23,16 +23,14 @@ defmodule Swell.Messaging.Topology do
 
   defp set_up_topology(toploogy, chann) when is_map(toploogy) do
     Enum.each(toploogy, fn {exchange, queues} ->
-      exchange = to_string(exchange)
       :ok = AMQP.Exchange.declare(chann, exchange, :fanout, durable: true)
 
       Enum.each(queues, fn {queue, consumer_module, worker_count} ->
-        queue = to_string(queue)
         {:ok, _} = AMQP.Queue.declare(chann, queue, durable: true)
         :ok = AMQP.Queue.bind(chann, queue, exchange)
 
         Swell.WorkerSupervisor.start_workers(
-          Swell.Messaging.ComsumerWorker,
+          Swell.Messaging.Comsumer,
           {queue, consumer_module},
           worker_count
         )

@@ -13,11 +13,11 @@ config :swell,
 config :swell,
   messaging: [
     topology: %{
-      actions: [
-        {:action_dispatch, Swell.Messaging.Consumers.ActionDispatchConsumer, 1}
+      "actions" => [
+        {"action_dispatch", Swell.Messaging.Consumers.ActionDispatchConsumer, 1}
       ],
-      events: [
-        {:event_persistence, Swell.Messaging.Consumers.EventPersistenceConsumer, 1}
+      "events" => [
+        {"event_persistence", Swell.Messaging.Consumers.EventPersistenceConsumer, 1}
       ]
     }
   ]
