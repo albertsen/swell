@@ -30,7 +30,7 @@ defmodule Swell.Messaging.Topology do
         :ok = AMQP.Queue.bind(chann, queue, exchange)
 
         Swell.WorkerSupervisor.start_workers(
-          Swell.Messaging.Comsumer,
+          Swell.Messaging.Consumer,
           {queue, consumer_module},
           worker_count
         )
