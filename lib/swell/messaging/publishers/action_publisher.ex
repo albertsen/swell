@@ -1,4 +1,3 @@
 defmodule Swell.Messaging.Publishers.ActionPublisher do
-  use Swell.Messaging.Publisher
-  def queue(), do: "actions"
+  use Swell.Messaging.Publisher, exchange: "actions"
 end

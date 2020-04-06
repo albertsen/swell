@@ -16,7 +16,7 @@ defmodule Swell.Application do
       {Swell.Repos.WorkflowRepo, "workflows"},
       Swell.WorkerSupervisor,
       Swell.Messaging.Manager,
-      {Swell.Messaging.Publishers.ActionPublisher, "actions"},
+      Swell.Messaging.Publishers.ActionPublisher,
       {Plug.Cowboy, scheme: :http, plug: Swell.Services.WorkflowEndpoint, options: [port: 8080]}
     ]
   end

@@ -1,12 +1,16 @@
 defmodule Swell.Messaging.Publisher do
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
-      @me __MODULE__
+      import Swell.Messaging.Publisher
       require Logger
       use GenServer
 
-      def start_link(queue) do
-        GenServer.start(@me, queue, name: @me)
+      @me __MODULE__
+      @before_compile Swell.Messaging.Publisher
+      @exchange Keyword.fetch!(opts, :exchange)
+
+      def start_link(_) do
+        GenServer.start(@me, nil, name: @me)
       end
 
       def publish(message) do
@@ -14,18 +18,23 @@ defmodule Swell.Messaging.Publisher do
       end
 
       @impl GenServer
-      def init(queue) do
+      def init(_) do
         {:ok, channel} = Swell.Messaging.Manager.open_channel()
-        {:ok, {channel, queue}}
       end
 
       @impl GenServer
-      def handle_call({:publish, message}, _from, state = {channel, queue}) do
+      def handle_call({:publish, message}, _from, channel) do
         json = Jason.encode!(message)
         Logger.debug(fn -> "Publishing message: #{inspect(json)}" end)
-        res = Swell.Messaging.Manager.publish(channel, queue(), json)
-        {:reply, res, state}
+        res = Swell.Messaging.Manager.publish(channel, @exchange, json)
+        {:reply, res, channel}
       end
+    end
+  end
+
+  defmacro __before_compile__(_) do
+    quote do
+      def exchange(exchange), do: @exchange = exchange
     end
   end
 end
