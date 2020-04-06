@@ -2,13 +2,13 @@ use Mix.Config
 
 root_dir = System.get_env("SWELL_ROOT", File.cwd!())
 
+config :ex_json_schema,
+       :remote_schema_resolver,
+       fn path -> Swell.JSON.Validator.resolve_schema(path) end
+
 config :swell, db: [name: :swell, database: "swell", pool_size: 2]
 
-config :swell,
-  schemas: %{
-    workflow_def: Path.join([root_dir, "schemas", "workflow_def.schema.json"]),
-    workflow: Path.join([root_dir, "schemas", "workflow.schema.json"])
-  }
+config :swell, schema_dir: Path.join([root_dir, "schemas"])
 
 config :swell,
   messaging: [

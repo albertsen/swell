@@ -28,21 +28,7 @@
     ],
     "definitions": {
         "actionHandler": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "const": "endpoint"
-                },
-                "url": {
-                    "type": "string",
-                    "format": "uri"
-                }
-            },
-            "required": [
-                "type",
-                "url"
-            ]
+            "$ref": "includes/action_handler.schema.json"
         },
         "step": {
             "type": "object",

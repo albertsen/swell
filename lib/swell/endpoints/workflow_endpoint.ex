@@ -12,8 +12,8 @@ defmodule Swell.Services.WorkflowEndpoint do
     json_decoder: Jason
   )
 
-  plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflowdefs", :workflow_def})
-  plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflows", :workflow})
+  plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflowdefs", "workflow_def"})
+  plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflows", "workflow"})
   plug(:match)
   plug(:dispatch)
 

@@ -7,15 +7,32 @@ defmodule Swell.JSON.Validator do
     GenServer.start(@me, nil, name: @me)
   end
 
-  def validate(doc, schema_name) do
+  def validate(doc, schema_name) when is_binary(schema_name) do
     GenServer.call(@me, {:validate, doc, schema_name})
+  end
+
+  def resolve_schema(path) when is_binary(path) do
+    schema_dir = Application.get_env(:swell, :schema_dir)
+
+    Path.join(schema_dir, path)
+    |> load_schema()
   end
 
   @impl GenServer
   def init(_) do
+    schema_dir = Application.get_env(:swell, :schema_dir)
+
     schemas =
-      Application.get_env(:swell, :schemas)
+      Path.wildcard(Path.join(schema_dir, "*.schema.json"))
+      |> Enum.map(fn file ->
+        {
+          Path.basename(file, ".schema.json"),
+          file
+        }
+      end)
       |> Enum.map(fn {name, file} ->
+        Logger.info("Loading schema '#{name}' from file '#{file}'")
+
         {
           name,
           load_schema(file)
