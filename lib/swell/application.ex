@@ -12,8 +12,8 @@ defmodule Swell.Application do
     [
       worker(Mongo, [Application.get_env(:swell, :db)]),
       Swell.JSON.Validator,
-      {Swell.Repos.WorkflowDefRepo, "workflowDefs"},
-      {Swell.Repos.WorkflowRepo, "workflows"},
+      Swell.Repos.WorkflowDefRepo,
+      Swell.Repos.WorkflowRepo,
       Swell.WorkerSupervisor,
       Swell.Messaging.Manager,
       Swell.Messaging.Publishers.ActionPublisher,

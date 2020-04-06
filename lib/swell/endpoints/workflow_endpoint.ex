@@ -1,8 +1,8 @@
 defmodule Swell.Services.WorkflowEndpoint do
   alias Swell.Services.WorkflowDefService
   alias Swell.Services.WorkflowService
-  import Swell.Endpoints.Helper
   require Logger
+  use Swell.Endpoints.Endpoint
   use Plug.Router
   use Plug.ErrorHandler
 
@@ -48,27 +48,7 @@ defmodule Swell.Services.WorkflowEndpoint do
     |> send_json_response(conn)
   end
 
-  get "/action" do
-    doc = conn.body_params
-    order_status = conn.params["orderStatus"]
-    event = conn.params["event"]
-  end
-
   match _ do
     send_json_response({:not_found, "Not found"}, conn)
-  end
-
-  def handle_errors(conn, %{kind: kind, reason: reason, stack: stack}) do
-    Logger.error(
-      Exception.format(
-        :error,
-        "Error handling #{conn.method} request to #{conn.request_path} - Code: #{kind} - Rason: #{
-          inspect(reason)
-        }",
-        stack
-      )
-    )
-
-    send_json_response({:error, "An error occurred"}, conn)
   end
 end

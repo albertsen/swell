@@ -1,5 +1,4 @@
 defmodule Swell.Endpoints.Helper do
-  require Logger
   import Plug.Conn
   alias Plug.Conn.Status
 
@@ -24,18 +23,4 @@ defmodule Swell.Endpoints.Helper do
   def encode_body(nil), do: ""
 
   def encode_body(body), do: body
-
-  def handle_errors(conn, %{kind: kind, reason: reason, stack: stack}) do
-    Logger.error(
-      Exception.format(
-        :error,
-        "Error handling #{conn.method} request to #{conn.request_path} - Code: #{kind} - Rason: #{
-          inspect(reason)
-        }",
-        stack
-      )
-    )
-
-    send_json_response({:error, "An error occurred"}, conn)
-  end
 end

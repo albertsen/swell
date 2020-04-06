@@ -3,7 +3,8 @@ defmodule Swell.Repos.GenRepo do
     quote location: :keep, bind_quoted: [opts: opts] do
       use GenServer
       require Logger
-      @db Keyword.get(Application.get_env(:swell, :db), :name)
+      @db Keyword.fetch!(Application.get_env(:swell, :db), :name)
+      @collection Keyword.fetch!(opts, :collection)
       @me __MODULE__
 
       def create(doc) when is_map(doc) do
@@ -22,19 +23,19 @@ defmodule Swell.Repos.GenRepo do
         GenServer.call(@me, {:delete, id})
       end
 
-      def start_link(collection) when is_binary(collection) do
-        GenServer.start_link(@me, collection, name: @me)
+      def start_link(_) do
+        GenServer.start_link(@me, nil, name: @me)
       end
 
       @impl GenServer
-      def init(collection) when is_binary(collection) do
-        {:ok, collection}
+      def init(_) do
+        {:ok, nil}
       end
 
       @impl GenServer
-      def handle_call({:create, doc}, _from, collection) when is_map(doc) do
+      def handle_call({:create, doc}, _from, _) when is_map(doc) do
         doc = Map.put(doc, :_id, Map.get_lazy(doc, :id, fn -> UUID.uuid4() end))
-        res = Mongo.insert_one(@db, collection, doc)
+        res = Mongo.insert_one(@db, @collection, doc)
 
         reply =
           case res do
@@ -50,12 +51,12 @@ defmodule Swell.Repos.GenRepo do
               {:internal_server_error, %{message: "An error occurred"}}
           end
 
-        {:reply, reply, collection}
+        {:reply, reply, nil}
       end
 
       @impl GenServer
-      def handle_call({:find_by_id, id}, _from, collection) when is_binary(id) do
-        doc = Mongo.find_one(@db, collection, %{_id: id})
+      def handle_call({:find_by_id, id}, _from, _) when is_binary(id) do
+        doc = Mongo.find_one(@db, @collection, %{_id: id})
 
         reply =
           if doc do
@@ -64,18 +65,20 @@ defmodule Swell.Repos.GenRepo do
             {:not_found, %{message: "No document found with ID: #{id}"}}
           end
 
-        {:reply, reply, collection}
+        {:reply, reply, nil}
       end
 
       @impl GenServer
-      def handle_call({:update, id, %{id: _id} = doc}, _from, collection) when is_binary(id) do
+      def handle_call({:update, id, %{id: _id} = doc}, _from, _) when is_binary(id) do
         if doc.id != id,
           do: raise("ID of document [#{doc.id}] and ID provided in resource [#{id}] don't match")
 
-        update_doc = doc
+        update_doc =
+          doc
           |> Map.put(:_id, id)
           |> Map.delete(:id)
-        res = Mongo.replace_one(@db, collection, %{_id: id}, update_doc )
+
+        res = Mongo.replace_one(@db, @collection, %{_id: id}, update_doc)
 
         reply =
           case res do
@@ -90,12 +93,12 @@ defmodule Swell.Repos.GenRepo do
               {:internal_server_errror, %{message: "An error occurred"}}
           end
 
-        {:reply, reply, collection}
+        {:reply, reply, nil}
       end
 
       @impl GenServer
-      def handle_call({:delete, id}, _from, collection) when is_binary(id) do
-        res = Mongo.delete_one(@db, collection, %{_id: id})
+      def handle_call({:delete, id}, _from, _) when is_binary(id) do
+        res = Mongo.delete_one(@db, @collection, %{_id: id})
 
         reply =
           case res do
@@ -107,7 +110,7 @@ defmodule Swell.Repos.GenRepo do
               {:internal_server_errror, %{message: "An error occurred"}}
           end
 
-        {:reply, reply, collection}
+        {:reply, reply, nil}
       end
 
       defp convert_doc(doc, id) do
@@ -116,7 +119,6 @@ defmodule Swell.Repos.GenRepo do
         |> Map.put(:id, id)
         |> Map.delete(:_id)
       end
-
     end
   end
 end

@@ -1,6 +1,6 @@
 defmodule Swell.Services.ActionEndpoint do
-  import Swell.Endpoints.Helper
   require Logger
+  use Swell.Endpoints.Endpoint
   use Plug.Router
   use Plug.ErrorHandler
 
@@ -13,14 +13,17 @@ defmodule Swell.Services.ActionEndpoint do
   plug(:match)
   plug(:dispatch)
 
-  get "/action" do
+  get "/handle" do
     doc = conn.body_params
     order_status = conn.params["orderStatus"]
     event = conn.params["event"]
 
-    %{
-      event: event,
-      document: %{doc | status: order_status}
+    {
+      :ok,
+      %{
+        event: event,
+        document: %{doc | status: order_status}
+      }
     }
     |> send_json_response(conn)
   end

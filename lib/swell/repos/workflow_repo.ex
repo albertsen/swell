@@ -1,3 +1,3 @@
 defmodule Swell.Repos.WorkflowRepo do
-  use Swell.Repos.GenRepo
+  use Swell.Repos.GenRepo, collection: "workflows"
 end
