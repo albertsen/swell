@@ -21,8 +21,8 @@ defmodule Swell.Services.ActionEndpoint do
     {
       :ok,
       %{
-        event: event,
-        document: %{doc | status: order_status}
+        "event" => event,
+        "document" => %{doc | "status" => order_status}
       }
     }
     |> send_json_response(conn)

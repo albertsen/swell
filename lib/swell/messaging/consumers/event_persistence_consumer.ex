@@ -2,6 +2,6 @@ defmodule Swell.Messaging.Consumers.EventPersistenceConsumer do
   require Logger
 
   def consume(message) do
-    Logger.info(inspect(message))
+    Logger.debug("Persisting: #{inspect(message)}")
   end
 end

@@ -2,7 +2,7 @@
     "type": "object",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "properties": {
-        "name": {
+        "stepName": {
             "type": "string"
         },
         "handler": {
@@ -14,6 +14,7 @@
         }
     },
     "required": [
+        "stepName",
         "handler",
         "document"
     ]

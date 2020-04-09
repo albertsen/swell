@@ -8,8 +8,7 @@ defmodule Swell.Services.WorkflowEndpoint do
 
   plug(Plug.Parsers,
     parsers: [:json],
-    pass: ["application/json"],
-    json_decoder: Jason
+    json_decoder: {Jason, :decode!, [[keys: :strings]]}
   )
 
   plug(Swell.Endpoints.Plugs.JSONValidator, {"/workflowdefs", "workflow_def"})

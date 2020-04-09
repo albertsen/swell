@@ -17,7 +17,7 @@ defmodule Swell.Messaging.Consumer do
   def handle_info({:basic_deliver, message, meta}, {channel, consumer}) do
     :ok =
       message
-      |> Jason.decode!(keys: :atoms)
+      |> Jason.decode!()
       |> log_message()
       |> consume({channel, consumer})
 

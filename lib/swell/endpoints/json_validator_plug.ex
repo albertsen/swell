@@ -18,7 +18,7 @@ defmodule Swell.Endpoints.Plugs.JSONValidator do
           send_json_response({:unprocessable_entity, body}, conn)
 
         _ ->
-          %{conn | body_params: Swell.Map.Helpers.atomize_keys(conn.body_params)}
+          conn
       end
     else
       conn

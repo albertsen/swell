@@ -40,6 +40,6 @@ defmodule Swell.Rest.Client do
   defp parse_body(""), do: ""
 
   defp parse_body(body) when is_binary(body) do
-    Jason.decode!(body, keys: :atoms)
+    Jason.decode!(body)
   end
 end

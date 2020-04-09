@@ -9,7 +9,8 @@ defmodule Swell.Endpoints.Helper do
   def send_json_response({:error, body}, conn),
     do: send_json_response({:internal_server_error, body}, conn)
 
-  def send_json_response({status, body}, conn) do
+  def send_json_response({status, body}, %Plug.Conn{} = conn)
+      when is_atom(status) do
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(Status.code(status), encode_body(body))
@@ -21,6 +22,4 @@ defmodule Swell.Endpoints.Helper do
   end
 
   def encode_body(nil), do: ""
-
-  def encode_body(body), do: body
 end

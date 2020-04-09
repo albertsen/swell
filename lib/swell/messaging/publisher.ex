@@ -6,10 +6,10 @@ defmodule Swell.Messaging.Publisher do
       use GenServer
 
       @me __MODULE__
-      @before_compile Swell.Messaging.Publisher
       @exchange Keyword.fetch!(opts, :exchange)
+      @schema Keyword.fetch!(opts, :schema)
 
-      def start_link(_) do
+      def start_link(schema) do
         GenServer.start(@me, nil, name: @me)
       end
 
@@ -18,23 +18,18 @@ defmodule Swell.Messaging.Publisher do
       end
 
       @impl GenServer
-      def init(_) do
+      def init(schema) do
         {:ok, channel} = Swell.Messaging.Manager.open_channel()
       end
 
       @impl GenServer
       def handle_call({:publish, message}, _from, channel) do
         json = Jason.encode!(message)
-        Logger.debug(fn -> "Publishing message: #{inspect(json)}" end)
-        res = Swell.Messaging.Manager.publish(channel, @exchange, json)
-        {:reply, res, channel}
+        Logger.debug(fn -> "Publishing message: #{json}" end)
+        :ok = Swell.JSON.Validator.validate(message, @schema)
+        :ok = Swell.Messaging.Manager.publish(channel, @exchange, json)
+        {:reply, :ok, channel}
       end
-    end
-  end
-
-  defmacro __before_compile__(_) do
-    quote do
-      def exchange(exchange), do: @exchange = exchange
     end
   end
 end

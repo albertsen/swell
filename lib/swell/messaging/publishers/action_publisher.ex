@@ -1,3 +1,3 @@
 defmodule Swell.Messaging.Publishers.ActionPublisher do
-  use Swell.Messaging.Publisher, exchange: "actions"
+  use Swell.Messaging.Publisher, exchange: "actions", schema: "action"
 end

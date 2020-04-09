@@ -15,7 +15,7 @@ defmodule Swell.Repos.GenRepo do
         GenServer.call(@me, {:find_by_id, id})
       end
 
-      def update(id, %{id: _id} = doc) when is_binary(id) do
+      def update(id, %{"id" => _id} = doc) when is_binary(id) do
         GenServer.call(@me, {:update, id, doc})
       end
 
@@ -34,7 +34,11 @@ defmodule Swell.Repos.GenRepo do
 
       @impl GenServer
       def handle_call({:create, doc}, _from, _) when is_map(doc) do
-        doc = Map.put(doc, :_id, Map.get_lazy(doc, :id, fn -> UUID.uuid4() end))
+        doc =
+          doc
+          |> Map.put("_id", Map.get_lazy(doc, "id", fn -> UUID.uuid4() end))
+          |> Map.delete("id")
+
         res = Mongo.insert_one(@db, @collection, doc)
 
         reply =
@@ -44,7 +48,8 @@ defmodule Swell.Repos.GenRepo do
               {:created, doc}
 
             {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000}]}} ->
-              {:conflict, %{message: "A document already exists with ID: #{doc.id}"}}
+              doc_id = doc["id"]
+              {:conflict, %{message: "A document already exists with ID: #{doc_id}"}}
 
             {:error, error} ->
               Logger.error("Error creating document: #{inspect(error)}")
@@ -56,7 +61,7 @@ defmodule Swell.Repos.GenRepo do
 
       @impl GenServer
       def handle_call({:find_by_id, id}, _from, _) when is_binary(id) do
-        doc = Mongo.find_one(@db, @collection, %{_id: id})
+        doc = Mongo.find_one(@db, @collection, %{"_id" => id})
 
         reply =
           if doc do
@@ -69,16 +74,16 @@ defmodule Swell.Repos.GenRepo do
       end
 
       @impl GenServer
-      def handle_call({:update, id, %{id: _id} = doc}, _from, _) when is_binary(id) do
-        if doc.id != id,
-          do: raise("ID of document [#{doc.id}] and ID provided in resource [#{id}] don't match")
+      def handle_call({:update, id, %{"id" => doc_id} = doc}, _from, _) when is_binary(id) do
+        if doc_id != id,
+          do: raise("ID of document [#{doc_id}] and ID provided in resource [#{id}] don't match")
 
-        update_doc =
+        doc =
           doc
-          |> Map.put(:_id, id)
-          |> Map.delete(:id)
+          |> Map.put("_id", id)
+          |> Map.delete("id")
 
-        res = Mongo.replace_one(@db, @collection, %{_id: id}, update_doc)
+        res = Mongo.replace_one(@db, @collection, %{"_id" => id}, doc)
 
         reply =
           case res do
@@ -86,7 +91,7 @@ defmodule Swell.Repos.GenRepo do
               {:not_found, %{message: "No document found with ID: #{id}"}}
 
             {:ok, _} ->
-              {:ok, doc}
+              {:ok, convert_doc(doc, id)}
 
             {:error, error} ->
               Logger.error("Error updating WorkflowDef: #{inspect(error)}")
@@ -98,7 +103,7 @@ defmodule Swell.Repos.GenRepo do
 
       @impl GenServer
       def handle_call({:delete, id}, _from, _) when is_binary(id) do
-        res = Mongo.delete_one(@db, @collection, %{_id: id})
+        res = Mongo.delete_one(@db, @collection, %{"_id" => id})
 
         reply =
           case res do
@@ -115,9 +120,8 @@ defmodule Swell.Repos.GenRepo do
 
       defp convert_doc(doc, id) do
         doc
-        |> Swell.Map.Helpers.atomize_keys()
-        |> Map.put(:id, id)
-        |> Map.delete(:_id)
+        |> Map.put("id", id)
+        |> Map.delete("_id")
       end
     end
   end
