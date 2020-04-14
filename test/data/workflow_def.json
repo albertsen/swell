@@ -4,31 +4,31 @@
     "actionHandlers": {
         "start": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=CREATED&event=started"
+            "url": "http://localhost:8081/handle?status=CREATED&event=started"
         },
         "checkOrder": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=CHECKED&event=orderChecked"
+            "url": "http://localhost:8081/handle?status=CHECKED&event=orderChecked"
         },
         "capturePayment": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=PAYMENT_CAPTURED&event=paymentCaptured"
+            "url": "http://localhost:8081/handle?status=PAYMENT_CAPTURED&event=paymentCaptured"
         },
         "prepareShipment": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=SHIPMENT_PREPARED&event=shipmentPrepared"
+            "url": "http://localhost:8081/handle?status=SHIPMENT_PREPARED&event=shipmentPrepared"
         },
         "ship": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=SHIPPED&event=shipped"
+            "url": "http://localhost:8081/handle?status=SHIPPED&event=shipped"
         },
         "error": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=ERROR&event=error"
+            "url": "http://localhost:8081/handle?status=ERROR&event=error"
         },
         "done": {
             "type": "endpoint",
-            "url": "http://loalhost:3010/handle?orderStatus=COMPLETED&event=done"
+            "url": "http://localhost:8081/handle?status=COMPLETED&event=done"
         }
     },
     "steps": {

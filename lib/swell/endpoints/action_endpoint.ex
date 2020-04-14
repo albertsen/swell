@@ -10,19 +10,23 @@ defmodule Swell.Services.ActionEndpoint do
     json_decoder: Jason
   )
 
+  plug(Swell.Endpoints.Plugs.JSONValidator, {"/handle", "action_handle_request"})
   plug(:match)
   plug(:dispatch)
 
-  get "/handle" do
-    doc = conn.body_params
-    order_status = conn.params["orderStatus"]
+  post "/handle" do
+    doc =
+      conn.body_params
+      |> Map.fetch!("document")
+
+    status = conn.params["status"]
     event = conn.params["event"]
 
     {
       :ok,
       %{
         "event" => event,
-        "document" => %{doc | "status" => order_status}
+        "document" => %{doc | "status" => status}
       }
     }
     |> send_json_response(conn)

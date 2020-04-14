@@ -34,9 +34,6 @@ defmodule Swell.Test.WorkflowServiceTest do
     workflow = Map.put(workflow, "id", workflow_id)
     assert doc == workflow
 
-    {status, _} = Client.post("#{@url}/workflows", workflow)
-    assert status == :conflict
-
     {status, workflow_created} = Client.get("#{@url}/workflows/#{workflow_id}")
     assert status == :ok
     assert workflow == workflow_created
@@ -56,6 +53,8 @@ defmodule Swell.Test.WorkflowServiceTest do
 
     {status, _} = Client.put("#{@url}/workflowdefs/#{workflow_def_id}", workflow_def)
     assert status == :not_found
+
+    :timer.sleep(5000)
   end
 
   test "Workflow definition Schema Validation" do

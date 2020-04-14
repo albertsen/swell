@@ -53,7 +53,12 @@ defmodule Swell.JSON.Validator do
     res =
       schemas[schema_name]
       |> (fn schema ->
-            unless schema, do: raise(ArgumentError, message: "No such schema: #{schema_name}")
+            unless schema do
+              msg = "No such schema: #{schema_name}"
+              Logger.error(msg)
+              raise(ArgumentError, message: msg)
+            end
+
             schema
           end).()
       |> ExJsonSchema.Validator.validate(doc)
