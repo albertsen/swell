@@ -1,6 +1,27 @@
 defmodule Swell.Messaging.Topology do
+  use DynamicSupervisor
   require Logger
   alias Swell.Messaging.Manager
+  @me __MODULE__
+
+  def start_link(_) do
+    DynamicSupervisor.start_link(@me, nil, name: @me)
+  end
+
+  def init(_) do
+    DynamicSupervisor.init(strategy: :one_for_one)
+  end
+
+  defp start_child(module, opts) do
+    start_children(module, opts, 1)
+  end
+
+  defp start_children(module, opts, count)
+       when is_atom(module) and is_integer(count) do
+    for _ <- 1..count do
+      {:ok, _pid} = DynamicSupervisor.start_child(@me, {module, opts})
+    end
+  end
 
   def set_up() do
     {:ok, channel} = Manager.open_channel()
@@ -21,15 +42,16 @@ defmodule Swell.Messaging.Topology do
 
   defp set_up(_opts = [topology: topology], chann), do: set_up_topology(topology, chann)
 
-  defp set_up_topology(toploogy, chann) when is_map(toploogy) do
-    Enum.each(toploogy, fn {exchange, queues} ->
+  defp set_up_topology(toplogy, chann) when is_map(toplogy) do
+    Enum.each(toplogy, fn {exchange, [publisher: publisher, consumers: consumers]} ->
       :ok = AMQP.Exchange.declare(chann, exchange, :fanout, durable: true)
+      start_child(publisher, exchange)
 
-      Enum.each(queues, fn {queue, consumer_module, worker_count} ->
+      Enum.each(consumers, fn {queue, consumer_module, worker_count} ->
         {:ok, _} = AMQP.Queue.declare(chann, queue, durable: true)
         :ok = AMQP.Queue.bind(chann, queue, exchange)
 
-        Swell.WorkerSupervisor.start_workers(
+        start_children(
           Swell.Messaging.Consumer,
           {queue, consumer_module},
           worker_count

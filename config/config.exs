@@ -14,10 +14,12 @@ config :swell,
   messaging: [
     topology: %{
       "actions" => [
-        {"action_dispatch", Swell.Messaging.Consumers.ActionDispatchConsumer, 1}
+        publisher: Swell.Messaging.Publishers.ActionPublisher,
+        consumers: [{"action_dispatch", Swell.Messaging.Consumers.ActionDispatchConsumer, 1}]
       ],
       "events" => [
-        {"event_persistence", Swell.Messaging.Consumers.EventPersistenceConsumer, 1}
+        publisher: Swell.Messaging.Publishers.EventPublisher,
+        consumers: [{"event_persistence", Swell.Messaging.Consumers.EventPersistenceConsumer, 1}]
       ]
     }
   ]

@@ -14,9 +14,8 @@ defmodule Swell.Application do
       Swell.JSON.Validator,
       Swell.Repos.WorkflowDefRepo,
       Swell.Repos.WorkflowRepo,
-      Swell.WorkerSupervisor,
       Swell.Messaging.Manager,
-      Swell.Messaging.Publishers.ActionPublisher,
+      Swell.Messaging.Topology,
       {Plug.Cowboy, scheme: :http, plug: Swell.Services.WorkflowEndpoint, options: [port: 8080]},
       {Plug.Cowboy, scheme: :http, plug: Swell.Services.ActionEndpoint, options: [port: 8081]}
     ]
