@@ -15,11 +15,23 @@ config :swell,
     topology: %{
       "actions" => [
         publisher: Swell.Messaging.Publishers.ActionPublisher,
-        consumers: [{"action_dispatch", Swell.Messaging.Consumers.ActionDispatchConsumer, 1}]
+        consumers: [
+          [
+            queue: "action_dispatch",
+            module: Swell.Messaging.Consumers.ActionDispatchConsumer,
+            worker_count: 1
+          ]
+        ]
       ],
       "events" => [
         publisher: Swell.Messaging.Publishers.EventPublisher,
-        consumers: [{"event_persistence", Swell.Messaging.Consumers.EventPersistenceConsumer, 1}]
+        consumers: [
+          [
+            queue: "document_persistence",
+            module: Swell.Messaging.Consumers.DocumentPersistenceConsumer,
+            worker_count: 1
+          ]
+        ]
       ]
     }
   ]
