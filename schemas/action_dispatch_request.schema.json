@@ -2,6 +2,9 @@
     "type": "object",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "properties": {
+        "workflowId": {
+            "type": "string"
+        },
         "stepName": {
             "type": "string"
         },
@@ -14,6 +17,7 @@
         }
     },
     "required": [
+        "workflowId",
         "stepName",
         "handler",
         "document"

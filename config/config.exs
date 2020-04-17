@@ -19,7 +19,8 @@ config :swell,
           [
             queue: "action_dispatch",
             module: Swell.Messaging.Consumers.ActionDispatchConsumer,
-            worker_count: 1
+            worker_count: 1,
+            publish_next_with: Swell.Messaging.Publishers.EventPublisher
           ]
         ]
       ],

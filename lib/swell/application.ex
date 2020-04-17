@@ -12,8 +12,6 @@ defmodule Swell.Application do
     [
       worker(Mongo, [Application.get_env(:swell, :db)]),
       Swell.JSON.Validator,
-      Swell.Repos.WorkflowDefRepo,
-      Swell.Repos.WorkflowRepo,
       Swell.Messaging.Manager,
       Swell.Messaging.Topology,
       {Plug.Cowboy, scheme: :http, plug: Swell.Services.WorkflowEndpoint, options: [port: 8080]},

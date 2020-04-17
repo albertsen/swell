@@ -24,6 +24,10 @@ defmodule Swell.Services.WorkflowService do
     end
   end
 
+  def update_document(workflow_id, document) do
+    WorkflowRepo.update_document(workflow_id, document)
+  end
+
   defp handle_created_workflow({:created, workflow} = res, workflow_def) do
     :ok = publish_workflow(workflow, workflow_def)
     res
@@ -36,11 +40,16 @@ defmodule Swell.Services.WorkflowService do
     |> ActionPublisher.publish()
   end
 
-  defp create_action(%{"document" => document}, %{"actionHandlers" => action_handlers}, step_name)
+  defp create_action(
+         %{"id" => workflowId, "document" => document} = _workflow,
+         %{"actionHandlers" => action_handlers} = _workflow_def,
+         step_name
+       )
        when is_binary(step_name) do
     {:ok, action_handler} = Map.fetch(action_handlers, step_name)
 
     %{
+      "workflowId" => workflowId,
       "stepName" => step_name,
       "handler" => action_handler,
       "document" => document

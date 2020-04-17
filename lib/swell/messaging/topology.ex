@@ -47,13 +47,17 @@ defmodule Swell.Messaging.Topology do
       :ok = AMQP.Exchange.declare(chann, exchange, :fanout, durable: true)
       start_child(publisher, exchange)
 
-      Enum.each(consumers, fn [queue: queue, module: module, worker_count: worker_count] ->
+      Enum.each(consumers, fn opts ->
+        queue = Keyword.fetch!(opts, :queue)
+        module = Keyword.fetch!(opts, :module)
+        worker_count = Keyword.get(opts, :worker_count, 10)
+        publish_next_with = Keyword.get(opts, :publish_next_with)
         {:ok, _} = AMQP.Queue.declare(chann, queue, durable: true)
         :ok = AMQP.Queue.bind(chann, queue, exchange)
 
         start_children(
           Swell.Messaging.Consumer,
-          {queue, module},
+          {queue, module, publish_next_with},
           worker_count
         )
       end)

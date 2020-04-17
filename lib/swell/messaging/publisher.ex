@@ -24,8 +24,8 @@ defmodule Swell.Messaging.Publisher do
 
       @impl GenServer
       def handle_call({:publish, message}, _from, {exchange, channel} = state) do
+        Logger.debug(fn -> "Publishing message: #{inspect(message)}" end)
         json = Jason.encode!(message)
-        Logger.debug(fn -> "Publishing message: #{json}" end)
         :ok = Swell.JSON.Validator.validate(message, @schema)
         :ok = Swell.Messaging.Manager.publish(channel, exchange, json)
         {:reply, :ok, state}

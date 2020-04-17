@@ -15,9 +15,10 @@ defmodule Swell.Services.ActionEndpoint do
   plug(:dispatch)
 
   post "/handle" do
-    doc =
-      conn.body_params
-      |> Map.fetch!("document")
+    %{
+      "workflowId" => workflowId,
+      "document" => document
+    } = conn.body_params
 
     status = conn.params["status"]
     event = conn.params["event"]
@@ -25,8 +26,15 @@ defmodule Swell.Services.ActionEndpoint do
     {
       :ok,
       %{
-        "event" => event,
-        "document" => %{doc | "status" => status}
+        "workflowId" => workflowId,
+        "event" => %{
+          "name" => event,
+          "payload" => %{
+            "oldStatus" => document["status"],
+            "newStatus" => status
+          }
+        },
+        "document" => %{document | "status" => status}
       }
     }
     |> send_json_response(conn)

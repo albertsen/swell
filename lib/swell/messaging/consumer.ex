@@ -7,22 +7,24 @@ defmodule Swell.Messaging.Consumer do
   end
 
   @impl GenServer
-  def init({queue, consumer}) when is_binary(queue) do
+  def init({queue, consumer, publisher})
+      when is_binary(queue) and is_atom(consumer) and is_atom(publisher) do
     {:ok, channel} = Swell.Messaging.Manager.open_channel()
     {:ok, _} = Swell.Messaging.Manager.consume(channel, queue)
-    {:ok, {channel, consumer}}
+    {:ok, {channel, consumer, publisher}}
   end
 
   @impl GenServer
-  def handle_info({:basic_deliver, message, meta}, {channel, consumer}) do
+  def handle_info({:basic_deliver, message, meta}, {channel, consumer, publisher} = state) do
     :ok =
       message
       |> Jason.decode!()
       |> log_message()
-      |> consume({channel, consumer})
+      |> consume(consumer)
+      |> publish(publisher)
 
     Swell.Messaging.Manager.ack(channel, meta.delivery_tag)
-    {:noreply, {channel, consumer}}
+    {:noreply, state}
   end
 
   def handle_info({:basic_consume_ok, _}, channel) do
@@ -38,16 +40,22 @@ defmodule Swell.Messaging.Consumer do
   end
 
   @impl GenServer
-  def terminate(_reason, {channel, _consumer}) do
+  def terminate(_reason, {channel, _consumer, _publisher}) do
     AMQP.Channel.close(channel)
   end
 
   defp log_message(message) do
-    Logger.debug(fn -> "Consuming message: #{inspect(message)} - #{inspect(self())}" end)
+    Logger.debug(fn -> "Consuming message: #{inspect(message)}" end)
     message
   end
 
-  def consume(message, {_channel, consumer}) do
+  defp consume(message, consumer) do
     consumer.consume(message)
+  end
+
+  defp publish({:ok, _message}, nil), do: :ok
+
+  defp publish({:ok, message}, publisher) when is_atom(publisher) do
+    publisher.publish(message)
   end
 end
